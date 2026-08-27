@@ -36,33 +36,31 @@ export function blueprint_prop(game: Game, mesh: Mesh, generation: number) {
 /**
  * A piece thrown off a prop that was shot apart.
  *
- * Generation 1 keeps a collider, so the wreckage is still cover, and a short
- * life, so the arena does not silt up. Generation 2 is rubble: it has no
- * collider at all, it only falls and expires.
+ * Generation 1 is still cover and still shootable, with a short life so the
+ * arena does not silt up. Generation 2 is rubble: it lands, it lies there, and
+ * then it is gone. Nothing shatters a third time.
  *
  * ponytail: collisions between dynamic bodies are O(n^2), and chunks are the
  * only thing that can make n large. Lifespans keep the population bounded; if
  * that ever stops being enough, cap it by recycling the oldest chunk.
  */
 export function blueprint_chunk(game: Game, mesh: Mesh, generation: number) {
-    if (generation > 1) {
-        return [
-            transform(),
-            render_prism(mesh, CONCRETE_DARK),
-            rigid_body(RigidKind.Dynamic, 0.3),
-            lifespan(2.5),
-        ];
-    }
-
-    return [
+    let common = [
         transform(),
         render_prism(mesh, CONCRETE_DARK),
-        collide(true, Layer.Terrain, Layer.None),
+        // The mask has to name Terrain, not None: a collider with an empty mask
+        // is only ever found by colliders that name *it*, and nothing does, so
+        // the chunk would fall through the floor.
+        collide(true, Layer.Terrain, Layer.Terrain),
         rigid_body(RigidKind.Dynamic, 0.2),
-        health(PROP_HEALTH / 4),
-        shatter(generation),
-        lifespan(11),
     ];
+
+    if (generation > 1) {
+        // Rubble. It lands, it lies there, and then it is gone for good.
+        return [...common, lifespan(2.5)];
+    }
+
+    return [...common, health(PROP_HEALTH / 4), shatter(generation), lifespan(11)];
 }
 
 /** The floor and the outer walls: solid, and never destructible. */

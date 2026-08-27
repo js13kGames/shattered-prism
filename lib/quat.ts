@@ -290,3 +290,23 @@ export function quat_get_axis(out_axis: Vec3, q: Quat) {
     }
     return rad;
 }
+
+const UP: Vec3 = [0, 1, 0];
+const align_axis: Vec3 = [0, 0, 0];
+
+/**
+ * Build the rotation that takes the +Y axis onto `direction`.
+ *
+ * Every cylinder in Goodluck stands on its own Y axis, so this is what points
+ * one at something. `direction` must be a unit vector.
+ */
+export function quat_align_y(out: Quat, direction: Vec3) {
+    vec3_cross(align_axis, UP, direction);
+    let sin = Math.hypot(align_axis[0], align_axis[1], align_axis[2]);
+    if (sin < 1e-6) {
+        // Straight up or straight down: the cross product carries no axis.
+        return quat_from_axis(out, [1, 0, 0], direction[1] > 0 ? 0 : Math.PI);
+    }
+    vec3_normalize(align_axis, align_axis);
+    return quat_from_axis(out, align_axis, Math.atan2(sin, direction[1]));
+}

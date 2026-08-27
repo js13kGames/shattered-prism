@@ -9,8 +9,7 @@
 
 import {instantiate} from "../../lib/game.js";
 import {Quat, Vec3} from "../../lib/math.js";
-import {quat_from_axis} from "../../lib/quat.js";
-import {vec3_cross, vec3_normalize} from "../../lib/vec3.js";
+import {quat_align_y} from "../../lib/quat.js";
 import {Entity} from "../../lib/world.js";
 import {aim_forward, aim_origin, play, shake_camera} from "../actions.js";
 import {blueprint_rebar, REBAR_SPEED} from "../blueprints/blu_effects.js";
@@ -52,7 +51,7 @@ function update(game: Game, entity: Entity, delta: number) {
     control.Cooldown = FIRE_INTERVAL;
     aim_forward(game, aim);
     aim_origin(game, origin);
-    align_to(rotation, aim);
+    quat_align_y(rotation, aim);
 
     let rebar = instantiate(game, [
         ...blueprint_rebar(game, entity),
@@ -77,23 +76,4 @@ function update(game: Game, entity: Entity, delta: number) {
 
     play(game, entity, snd_shoot);
     shake_camera(game, 0.09);
-}
-
-const UP: Vec3 = [0, 1, 0];
-let axis: Vec3 = [0, 0, 0];
-
-/**
- * Build the rotation that takes the mesh's own +Y axis onto `direction`. Every
- * cylinder in the game stands on its Y axis, so this points them at things.
- */
-function align_to(out: Quat, direction: Vec3) {
-    vec3_cross(axis, UP, direction);
-    let sin = Math.hypot(axis[0], axis[1], axis[2]);
-    if (sin < 1e-4) {
-        // Straight up or straight down; the cross product is useless there.
-        quat_from_axis(out, [1, 0, 0], direction[1] > 0 ? 0 : Math.PI);
-        return;
-    }
-    vec3_normalize(axis, axis);
-    quat_from_axis(out, axis, Math.atan2(sin, direction[1]));
 }

@@ -134,3 +134,43 @@ export function vec3_lerp(out: Vec3, a: Vec3, b: Vec3, t: number) {
     out[2] = az + t * (b[2] - az);
     return out;
 }
+
+/**
+ * Extend one vector with the values of another.
+ *
+ * For each component, if the values are both positive or both negative, keep
+ * the value farthest from zero. If the values have different signs, keep the
+ * value from the first vector.
+ *
+ * @param out The output vector.
+ * @param a The first, base vector, whose components take precedence if necessary.
+ * @param b The second vector to extend with.
+ */
+export function vec3_extend(out: Vec3, a: Vec3, b: Vec3) {
+    if (a[0] >= 0 && b[0] >= 0) {
+        out[0] = Math.max(a[0], b[0]);
+    } else if (a[0] <= 0 && b[0] <= 0) {
+        out[0] = Math.min(a[0], b[0]);
+    } else {
+        out[0] = a[0];
+    }
+
+    if (a[1] <= 0 && b[1] <= 0) {
+        out[1] = Math.min(a[1], b[1]);
+    } else {
+        // Both up, or one of each: keep the upward one. Gravity means a
+        // response that lifts a body out of the floor has to win. This branch
+        // used to leave out[1] alone when the signs differed, which quietly
+        // made the result depend on whether the caller aliased out with a or
+        // with b, and the two callers here alias different ones.
+        out[1] = Math.max(a[1], b[1]);
+    }
+
+    if (a[2] >= 0 && b[2] >= 0) {
+        out[2] = Math.max(a[2], b[2]);
+    } else if (a[2] <= 0 && b[2] <= 0) {
+        out[2] = Math.min(a[2], b[2]);
+    } else {
+        out[2] = a[2];
+    }
+}
