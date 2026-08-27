@@ -1,8 +1,9 @@
 /**
  * # ControlPlayer
  *
- * Make the entity controllable by the player. Suitable for first-person and
- * third-person 3D games, as well as some camera control schemes.
+ * Make the entity controllable by the player. The player is one entity with a
+ * camera child, so the movement-tech state (dash charges, slide) lives here
+ * rather than in a component of its own.
  */
 
 import {Entity} from "../../lib/world.js";
@@ -15,18 +16,22 @@ export interface ControlPlayer {
     Pitch: number;
     MinPitch: number;
     MaxPitch: number;
+    /** Air-dashes left before touching the ground again. */
+    Dashes: number;
+    /** Time until the next shot. */
+    Cooldown: number;
+    /** Time left in the current slide. */
+    Slide: number;
 }
 
 /**
  * Add `ControlPlayer` to an entity.
  *
- * @param move - Whether to control the entity's movement.
- * @param yaw - Sensitivity of the yaw control. 1 means that 1 pixel traveled
- * by the mouse is equal to 1° of rotation; that's too sensitive usually.
- * @param pitch - Sensitivity of the pitch control. 1 means that 1 pixel traveled
- * by the mouse is equal to 1° of rotation; that's too sensitive usually.
- * @param min_pitch - Min pitch allowed, in arc degrees.
- * @param max_pitch - Max pitch allowed, in arc degrees.
+ * @param move Whether to control the entity's movement.
+ * @param yaw Sensitivity of the yaw control, in degrees per pixel.
+ * @param pitch Sensitivity of the pitch control, in degrees per pixel.
+ * @param min_pitch Min pitch allowed, in arc degrees.
+ * @param max_pitch Max pitch allowed, in arc degrees.
  */
 export function control_player(
     move: boolean,
@@ -43,6 +48,11 @@ export function control_player(
             Pitch: pitch,
             MinPitch: min_pitch,
             MaxPitch: max_pitch,
+            Dashes: DASH_CHARGES,
+            Cooldown: 0,
+            Slide: 0,
         };
     };
 }
+
+export const DASH_CHARGES = 2;

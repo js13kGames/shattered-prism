@@ -1,78 +1,55 @@
-import {ease_in_out_quad, ease_in_quad, ease_out_quad} from "../../lib/easing.js";
-import {quat_from_euler} from "../../lib/quat.js";
-import {AnimationFlag, animate} from "../components/com_animate.js";
+import {perspective} from "../../lib/projection.js";
 import {audio_listener} from "../components/com_audio_listener.js";
 import {audio_source} from "../components/com_audio_source.js";
+import {camera_target} from "../components/com_camera.js";
 import {children} from "../components/com_children.js";
 import {collide} from "../components/com_collide.js";
 import {control_player} from "../components/com_control_player.js";
-import {light_point} from "../components/com_light.js";
+import {health} from "../components/com_gameplay.js";
 import {move} from "../components/com_move.js";
-import {named} from "../components/com_named.js";
-import {render_colored_shaded} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
+import {shake} from "../components/com_shake.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
 
+export const PLAYER_HEALTH = 100;
+export const EYE_HEIGHT = 0.7;
+
+/** Near-black, so that only the neon carries colour. */
+export const CLEAR_COLOR: [number, number, number, number] = [0.02, 0.02, 0.03, 1];
+export const FOG_DISTANCE = 55;
+
+/**
+ * The player is a yaw rig with a pitch child; the camera hangs off the pitch
+ * child, turned around, because cameras look down their own -Z.
+ *
+ * Children[0] of the root is the eye. The scene stores it on the game as
+ * `PlayerEye`: it is both the aim direction and the muzzle.
+ */
 export function blueprint_player(game: Game) {
     return [
         transform(),
-        control_player(true, 0.2, 0),
-        move(10, 3),
-        collide(true, Layer.Player, Layer.Terrain),
-        rigid_body(RigidKind.Dynamic),
+        control_player(true, 0.15, 0),
+        move(9, 0),
+        collide(true, Layer.Player, Layer.Terrain | Layer.Enemy | Layer.Pickup, [0.8, 1.8, 0.8]),
+        rigid_body(RigidKind.Dynamic, 0),
+        health(PLAYER_HEALTH),
         audio_source(false),
         audio_listener(),
-        children(
-            // Body.
-            [
-                transform(),
-                render_colored_shaded(game.MaterialColoredShaded, game.MeshCube, [1, 0.3, 0.2, 1]),
-                animate({
-                    idle: {
-                        Keyframes: [
-                            {
-                                Timestamp: 0,
-                                Rotation: quat_from_euler([0, 0, 0, 1], 0, -5, 0),
-                                Ease: ease_in_out_quad,
-                            },
-                            {
-                                Timestamp: 1,
-                                Rotation: quat_from_euler([0, 0, 0, 1], 0, 5, 0),
-                                Ease: ease_in_out_quad,
-                            },
-                        ],
-                    },
-                    jump: {
-                        Keyframes: [
-                            {
-                                Timestamp: 0,
-                                Rotation: [0, 0, 0, 1],
-                            },
-                            {
-                                Timestamp: 0.5,
-                                Rotation: [1, 0, 0, 0],
-                                Ease: ease_in_quad,
-                            },
-                            {
-                                Timestamp: 1,
-                                Rotation: [0, 0, 0, -1],
-                                Ease: ease_out_quad,
-                            },
-                        ],
-                        Flags: AnimationFlag.None,
-                    },
-                }),
-            ],
-            // Camera rig anchor.
-            [
-                transform(),
-                named("camera anchor"),
-                move(0, 3),
-                control_player(false, 0, 0.2, -10, 80),
-            ],
-            // Overhead light.
-            [transform([0, 2, 0]), light_point([1, 1, 1], 5)],
-        ),
+        children([
+            transform([0, EYE_HEIGHT, 0]),
+            control_player(false, 0, 0.15, -85, 85),
+            move(0, 0),
+            children([
+                transform(undefined, [0, 1, 0, 0]),
+                shake(0),
+                camera_target(
+                    game.Targets.Scene,
+                    perspective(1.2, 0.1, 250),
+                    CLEAR_COLOR,
+                    FOG_DISTANCE,
+                ),
+            ]),
+        ]),
     ];
 }

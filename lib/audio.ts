@@ -25,7 +25,8 @@ export interface AudioSynthClip {
 
 export interface AudioTrack {
     Instrument: Instrument;
-    Notes: Array<number>;
+    /** Sixteenth notes. A hole in the array is a rest. */
+    Notes: Array<number | undefined>;
 }
 
 export interface Instrument {
@@ -236,8 +237,9 @@ export function play_synth_clip(
     let interval = spb / 4;
     for (let track of clip.Tracks) {
         for (let i = 0; i < track.Notes.length; i++) {
-            if (track.Notes[i]) {
-                play_note(audio, panner, track.Instrument, track.Notes[i], i * interval);
+            let note = track.Notes[i];
+            if (note) {
+                play_note(audio, panner, track.Instrument, note, i * interval);
             }
         }
     }

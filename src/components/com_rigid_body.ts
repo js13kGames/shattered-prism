@@ -28,6 +28,10 @@ export interface RigidBody {
     VelocityResolved: Vec3;
     LastPosition: Vec3;
     IsGrounded: boolean;
+    /** How fast horizontal velocity bleeds off while grounded. */
+    Friction: number;
+    /** Multiplier on gravity. Rebars fly flat, so theirs is 0. */
+    Gravity: number;
 }
 
 /**
@@ -35,8 +39,9 @@ export interface RigidBody {
  *
  * @param kind The type of the rigid body (static, dynamic, kinematic).
  * @param bounciness Bounciness of the rigid body (0 = no bounce, 1 = full bounce).
+ * @param friction How fast horizontal velocity bleeds off on the ground.
  */
-export function rigid_body(kind: RigidKind, bounciness = 0.5) {
+export function rigid_body(kind: RigidKind, bounciness = 0.5, friction = 9, gravity = 1) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.RigidBody;
         game.World.RigidBody[entity] = {
@@ -48,6 +53,8 @@ export function rigid_body(kind: RigidKind, bounciness = 0.5) {
             VelocityResolved: [0, 0, 0],
             LastPosition: [0, 0, 0],
             IsGrounded: false,
+            Friction: friction,
+            Gravity: gravity,
         };
     };
 }

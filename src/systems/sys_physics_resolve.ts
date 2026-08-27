@@ -60,6 +60,7 @@ function update(game: Game, entity: Entity) {
 
         for (let i = 0; i < collide.Collisions.length; i++) {
             let collision = collide.Collisions[i];
+            let bounced = false;
             if (game.World.Signature[collision.Other] & Has.RigidBody) {
                 // Assume mass = 1 for all rigid bodies. On collision,
                 // velocities are swapped, unless the other body is a static
@@ -72,16 +73,18 @@ function update(game: Game, entity: Entity) {
                         // against static bodies need to be resolved first.
                         vec3_extend(response, collision.Hit, response);
 
-                        // Compute the reflection vector as
-                        //   r = v - 2 * (v·n) * n
-                        // where
-                        //   v — the incident velocity vector
-                        //   n — the normal of the surface of reflection
-                        // Compute n.
+                        // Split the velocity into the part along the surface
+                        // normal and the part along the surface, and bounce
+                        // only the first. Scaling the whole vector by
+                        // Bounciness instead would mean that standing on the
+                        // ground with Bounciness 0 wipes out sideways velocity
+                        // every frame, and a dash would end the moment it
+                        // landed.
                         vec3_normalize(a, collision.Hit);
-                        // Compute - 2 * (v·n) * n.
-                        vec3_scale(a, a, -2 * vec3_dot(rigid_body.VelocityLinear, a));
+                        let along = vec3_dot(rigid_body.VelocityLinear, a);
+                        vec3_scale(a, a, -along * (1 + rigid_body.Bounciness));
                         vec3_add(rigid_body.VelocityResolved, rigid_body.VelocityLinear, a);
+                        bounced = true;
                         break;
                     case RigidKind.Dynamic:
                     case RigidKind.Kinematic:
@@ -92,12 +95,15 @@ function update(game: Game, entity: Entity) {
                         break;
                 }
 
-                // When Bounciness = 1, collisions are 100% elastic.
-                vec3_scale(
-                    rigid_body.VelocityResolved,
-                    rigid_body.VelocityResolved,
-                    rigid_body.Bounciness,
-                );
+                if (!bounced) {
+                    // Against a moving body, Bounciness still scales the whole
+                    // swapped velocity.
+                    vec3_scale(
+                        rigid_body.VelocityResolved,
+                        rigid_body.VelocityResolved,
+                        rigid_body.Bounciness,
+                    );
+                }
 
                 if (collision.Hit[1] > 0) {
                     // Collision from the bottom means the body is grounded.
@@ -158,7 +164,7 @@ function vec3_extend(out: Vec3, a: Vec3, b: Vec3) {
 
     if (a[2] >= 0 && b[2] >= 0) {
         out[2] = Math.max(a[2], b[2]);
-    } else if (a[0] <= 0 && b[0] <= 0) {
+    } else if (a[2] <= 0 && b[2] <= 0) {
         out[2] = Math.min(a[2], b[2]);
     } else {
         out[2] = a[2];

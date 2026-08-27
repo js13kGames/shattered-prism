@@ -1,10 +1,10 @@
 /**
  * # sys_control_keyboard
  *
- * Handle keyboard input.
+ * Turn WASD into a movement direction in the entity's own space. Looking is
+ * mouse-only, so there is nothing here for the arrow keys.
  */
 
-import {quat_get_pitch, quat_multiply} from "../../lib/quat.js";
 import {Entity} from "../../lib/world.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
@@ -20,56 +20,21 @@ export function sys_control_keyboard(game: Game, delta: number) {
 }
 
 function update(game: Game, entity: Entity) {
-    let control = game.World.ControlPlayer[entity];
-
-    if (control.Move) {
-        let move = game.World.Move[entity];
-        if (game.InputState["KeyW"]) {
-            // Move forward
-            move.Direction[2] += 1;
-        }
-        if (game.InputState["KeyA"]) {
-            // Strafe left
-            move.Direction[0] += 1;
-        }
-        if (game.InputState["KeyS"]) {
-            // Move backward
-            move.Direction[2] -= 1;
-        }
-        if (game.InputState["KeyD"]) {
-            // Strafe right
-            move.Direction[0] -= 1;
-        }
+    if (!game.World.ControlPlayer[entity].Move) {
+        return;
     }
 
-    if (control.Yaw) {
-        // Yaw is applied relative to the entity's local space; the Y axis is
-        // not affected by its current orientation.
-        let move = game.World.Move[entity];
-        if (game.InputState["ArrowLeft"]) {
-            // Look left.
-            quat_multiply(move.LocalRotation, move.LocalRotation, [0, 1, 0, 0]);
-        }
-        if (game.InputState["ArrowRight"]) {
-            // Look right.
-            quat_multiply(move.LocalRotation, move.LocalRotation, [0, -1, 0, 0]);
-        }
+    let move = game.World.Move[entity];
+    if (game.InputState["KeyW"]) {
+        move.Direction[2] += 1;
     }
-
-    if (control.Pitch) {
-        // Pitch is applied relative to the entity's self space; the X axis is
-        // always aligned with its left and right sides.
-        let transform = game.World.Transform[entity];
-        let move = game.World.Move[entity];
-
-        let current_pitch = quat_get_pitch(transform.Rotation);
-        if (game.InputState["ArrowUp"] && current_pitch > control.MinPitch) {
-            // Look up.
-            quat_multiply(move.SelfRotation, move.SelfRotation, [-1, 0, 0, 0]);
-        }
-        if (game.InputState["ArrowDown"] && current_pitch < control.MaxPitch) {
-            // Look down.
-            quat_multiply(move.SelfRotation, move.SelfRotation, [1, 0, 0, 0]);
-        }
+    if (game.InputState["KeyS"]) {
+        move.Direction[2] -= 1;
+    }
+    if (game.InputState["KeyA"]) {
+        move.Direction[0] += 1;
+    }
+    if (game.InputState["KeyD"]) {
+        move.Direction[0] -= 1;
     }
 }
