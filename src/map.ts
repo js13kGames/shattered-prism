@@ -71,7 +71,7 @@ const STAIRS: Array<[number, number, number, number, number, number]> = [
 ];
 
 /** Where the player starts, in cells. */
-export const START: [number, number] = [6, 29];
+export const START: [number, number] = [4, 30];
 /** The way out, in cells. */
 export const EXIT: [number, number] = [34, 4];
 
@@ -138,7 +138,7 @@ export const PILLARS: Array<[number, number]> = [
 
 /** Ammo boxes: [x, z, weapon index]. */
 export const AMMO: Array<[number, number, number]> = [
-    [4, 30, 1],
+    [6, 31, 1],
     [19, 29, 1],
     [5, 18, 2],
     [14, 13, 1],
@@ -184,7 +184,7 @@ export const SPAWNS: Array<Spawn> = [
     {Kind: EnemyKind.Sentinel, Route: [[13, 29], [19, 29]]},
     {Kind: EnemyKind.Gunner, Route: [[17, 29], [12, 29]]},
     // Start room, one slow patrol.
-    {Kind: EnemyKind.Sentinel, Route: [[5, 27], [9, 27], [9, 30], [5, 30]]},
+    {Kind: EnemyKind.Sentinel, Route: [[8, 27], [9, 30]]},
     // West wing.
     {Kind: EnemyKind.Sentinel, Route: [[4, 15], [4, 21], [6, 21], [6, 15]]},
     {Kind: EnemyKind.Hound, Route: [[6, 18]]},

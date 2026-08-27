@@ -13,7 +13,7 @@ import {transform} from "../components/com_transform.js";
 import {CLEAR_COLOR, FOG_DISTANCE} from "../level.js";
 import {Game, Layer} from "../game.js";
 
-export const PLAYER_HEALTH = 100;
+export const PLAYER_HEALTH = 125;
 export const EYE_HEIGHT = 0.7;
 export const PLAYER_HALF_HEIGHT = 0.9;
 
