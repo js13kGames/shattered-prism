@@ -24,7 +24,6 @@ import {Entity} from "../../lib/world.js";
 import {hurt_player, play} from "../actions.js";
 import {blueprint_bolt} from "../blueprints/blu_effects.js";
 import {STATS} from "../blueprints/blu_enemies.js";
-import {destroy_all} from "../components/com_children.js";
 import {AiState} from "../components/com_gameplay.js";
 import {set_position} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
@@ -71,10 +70,15 @@ function update(game: Game, entity: Entity, delta: number) {
     mat4_get_translation(self_position, transform.World);
 
     if (self_position[1] < VOID_LEVEL) {
-        // Count it as killed. An enemy lost under the level would otherwise
-        // keep the tally from ever reaching zero.
-        destroy_all(game.World, entity);
-        game.Kills++;
+        // It walked off something it should not have. Put it back on its post
+        // rather than deleting it: a level that quietly loses its enemies is
+        // worse than one that recycles them.
+        transform.Translation[0] = ai.Route[0][0];
+        transform.Translation[1] = ai.Route[0][1];
+        transform.Translation[2] = ai.Route[0][2];
+        body.VelocityLinear[0] = body.VelocityLinear[1] = body.VelocityLinear[2] = 0;
+        ai.State = AiState.Patrol;
+        game.World.Signature[entity] |= Has.Dirty;
         return;
     }
 

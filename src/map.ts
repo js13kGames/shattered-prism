@@ -111,17 +111,17 @@ export const LAMPS: Array<[number, number, number, number, number, number, numbe
 
 /** Destructible crates: [x, z]. */
 export const CRATES: Array<[number, number]> = [
-    [8, 27],
-    [9, 30],
-    [17, 29],
+    [10, 26],
+    [10, 31],
+    [13, 30],
     [12, 14],
     [17, 21],
     [11, 22],
-    [4, 15],
-    [6, 21],
+    [3, 14],
+    [7, 20],
     [23, 17],
     [31, 20],
-    [26, 13],
+    [27, 15],
     [16, 3],
     [28, 3],
     [33, 6],
@@ -191,8 +191,8 @@ export const SPAWNS: Array<Spawn> = [
     // Courtyard.
     {Kind: EnemyKind.Hound, Route: [[11, 14]]},
     {Kind: EnemyKind.Hound, Route: [[17, 23]]},
-    {Kind: EnemyKind.Gunner, Route: [[10, 18], [18, 18]]},
-    {Kind: EnemyKind.Sentinel, Route: [[14, 13], [14, 23]]},
+    {Kind: EnemyKind.Gunner, Route: [[10, 17], [18, 17]]},
+    {Kind: EnemyKind.Sentinel, Route: [[13, 13], [13, 23]]},
     // Stair hall.
     {Kind: EnemyKind.Gunner, Route: [[24, 30], [24, 26]]},
     // Balcony.

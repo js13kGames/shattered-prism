@@ -154,6 +154,31 @@ function rotate(out: Vec3, q: Quat, v: Vec3) {
         }
     }
 
+    // Pillars and crates are solid, and the AI cannot path around them.
+    let obstacles = new Set(
+        [...PILLARS, ...CRATES].map((cell) => cell[1] * GRID_W + cell[0]),
+    );
+    let blocked = (a: Array<number>, b: Array<number>) => {
+        let span = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+        for (let s = 0; s <= span * 2; s++) {
+            let t = span ? s / (span * 2) : 0;
+            let x = Math.round(a[0] + (b[0] - a[0]) * t);
+            let z = Math.round(a[1] + (b[1] - a[1]) * t);
+            if (obstacles.has(z * GRID_W + x)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    for (let spawn of SPAWNS) {
+        check(
+            "spawn is clear of obstacles",
+            !obstacles.has(spawn.Route[0][1] * GRID_W + spawn.Route[0][0]),
+            `at ${spawn.Route[0]}`,
+        );
+    }
+
     // The AI has no pathfinding: it walks the straight line between route
     // nodes. So every cell on that line has to be floor, and no two cells in a
     // row may rise by more than one step, or the enemy walks into a wall for
@@ -179,6 +204,7 @@ function rotate(out: Vec3, q: Quat, v: Vec3) {
             }
 
             check("patrol leg is walkable", walkable, `${a} -> ${b}`);
+            check("patrol leg is unobstructed", !blocked(a, b), `${a} -> ${b}`);
         }
     }
 }

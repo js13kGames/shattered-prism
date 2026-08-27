@@ -61,8 +61,15 @@ const NONE: Vec4 = [0, 0, 0, 0];
 export const CLEAR_COLOR: Vec4 = [0.02, 0.02, 0.03, 1];
 export const FOG_DISTANCE = 70;
 
-/** How deep under the walkable surface a floor slab reaches. */
-const BASE = 2;
+/**
+ * How deep under the walkable surface a floor slab reaches.
+ *
+ * Deliberately far deeper than it needs to look right. Box collisions resolve
+ * along the axis of least penetration, so a body squeezed into a corner can be
+ * pushed *down*; if the slab is thin it pops out underneath and falls out of
+ * the world. Twelve units of concrete under every floor makes that impossible.
+ */
+const BASE = 12;
 export const CRATE_HEALTH = 60;
 
 export function scene_level(game: Game) {

@@ -1,5 +1,15 @@
 # Shattered Prism — Build Plan
 
+> **Status.** This plan describes the first build: an arena survival game on the
+> Goodluck template. That version was finished and is in the history at
+> `Land debris on the floor, extract the maths, add a self-check (11701b)`.
+>
+> The game has since been rebuilt as a 1990s-style labyrinth shooter with
+> shadows, lifts, jump pads, patrol AI and three weapons. See
+> [game-design-doc.md](game-design-doc.md) for what the game is now, and the
+> README for how it is put together. Sections 1 to 4 and 7 to 10 below still
+> describe how the project is built, measured and committed, and still apply.
+
 This document tells you how to build the game from the [design document](game-design-doc.md) with the Goodluck template. Read this document fully before you write code. All sentences use ASD-STE 100 style: short, active, one instruction each.
 
 ---
