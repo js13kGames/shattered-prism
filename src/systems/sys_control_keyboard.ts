@@ -12,6 +12,8 @@ import {Has} from "../world.js";
 const QUERY = Has.Move | Has.ControlPlayer;
 
 export function sys_control_keyboard(game: Game, delta: number) {
+    game.Walking = false;
+
     for (let i = 0; i < game.World.Signature.length; i++) {
         if ((game.World.Signature[i] & QUERY) === QUERY) {
             update(game, i);
@@ -37,4 +39,8 @@ function update(game: Game, entity: Entity) {
     if (game.InputState["KeyD"]) {
         move.Direction[0] -= 1;
     }
+
+    // The viewmodel bobs off this rather than off velocity, so that walking
+    // into a wall still reads as walking.
+    game.Walking = !!(move.Direction[0] || move.Direction[2]);
 }

@@ -1,7 +1,7 @@
 /**
  * # sys_control_move_tech
  *
- * Jump, air-dash and slide: everything that turns walking into traversal.
+ * Jump, air-dash, slide, and the step-up that makes stairs walkable.
  *
  * Walking is positional (see [`sys_move`](sys_move.html)); everything here is
  * an impulse straight into the rigid body's velocity, so it stacks with the
@@ -11,13 +11,14 @@
 import {Vec3} from "../../lib/math.js";
 import {Entity} from "../../lib/world.js";
 import {aim_forward, play, shake_camera} from "../actions.js";
-import {EYE_HEIGHT} from "../blueprints/blu_player.js";
+import {EYE_HEIGHT, PLAYER_HALF_HEIGHT} from "../blueprints/blu_player.js";
 import {DASH_CHARGES} from "../components/com_control_player.js";
 import {Game} from "../game.js";
+import {STEP_HEIGHT} from "../map.js";
 import {snd_dash} from "../sounds.js";
 import {Has} from "../world.js";
 
-const QUERY = Has.ControlPlayer | Has.RigidBody | Has.Transform;
+const QUERY = Has.ControlPlayer | Has.RigidBody | Has.Transform | Has.Collide;
 
 const JUMP_SPEED = 10;
 const DASH_SPEED = 27;
@@ -58,6 +59,8 @@ function update(game: Game, entity: Entity, delta: number) {
         body.VelocityLinear[1] = 0;
         game.World.Signature[entity] |= Has.Dirty;
     }
+
+    step_up(game, entity, transform, body);
 
     if (body.IsGrounded) {
         control.Dashes = DASH_CHARGES;
@@ -100,5 +103,56 @@ function update(game: Game, entity: Entity, delta: number) {
     if (Math.abs(eye.Translation[1] - target) > 0.001) {
         eye.Translation[1] += (target - eye.Translation[1]) * Math.min(1, delta * 16);
         game.World.Signature[game.PlayerEye] |= Has.Dirty;
+    }
+}
+
+/**
+ * Climb low ledges.
+ *
+ * Box collision alone cannot do stairs: walking into a step, the shallowest way
+ * out of the box is always sideways, so the response pushes you back rather
+ * than up, and you stand there scuffing your feet. So look at what was hit from
+ * the side last frame, and if its top is within a step of the player's feet,
+ * lift them onto it.
+ */
+function step_up(
+    game: Game,
+    entity: Entity,
+    transform: Game["World"]["Transform"][0],
+    body: Game["World"]["RigidBody"][0],
+) {
+    if (body.VelocityLinear[1] > 0.1) {
+        // On the way up out of a jump; do not snap to anything.
+        return;
+    }
+
+    let collisions = game.World.Collide[entity].Collisions;
+    let feet = transform.Translation[1] - PLAYER_HALF_HEIGHT;
+    let climb = 0;
+
+    for (let i = 0; i < collisions.length; i++) {
+        let collision = collisions[i];
+        if (Math.abs(collision.Hit[1]) > 0.02) {
+            // A hit from below or above is the floor or the ceiling, not a step.
+            continue;
+        }
+
+        let other = game.World.Collide[collision.Other];
+        if (!other) {
+            continue;
+        }
+
+        let top = other.Max[1];
+        if (top > feet + 0.02 && top <= feet + STEP_HEIGHT && top > climb) {
+            climb = top;
+        }
+    }
+
+    if (climb) {
+        transform.Translation[1] = climb + PLAYER_HALF_HEIGHT + 0.02;
+        if (body.VelocityLinear[1] < 0) {
+            body.VelocityLinear[1] = 0;
+        }
+        game.World.Signature[entity] |= Has.Dirty;
     }
 }

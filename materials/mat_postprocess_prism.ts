@@ -34,7 +34,7 @@ let fragment = `#version 300 es\n
     out vec4 frag_color;
 
     const vec2 TEXEL = vec2(1.0 / 320.0, 1.0 / 240.0);
-    const float THRESHOLD = 0.5;
+    const float THRESHOLD = 0.62;
 
     void main() {
         vec3 color = texture(sampler, vert_uv).rgb;
@@ -48,7 +48,7 @@ let fragment = `#version 300 es\n
             bloom += max(texture(sampler, vert_uv + dir * 3.0).rgb - THRESHOLD, 0.0);
             bloom += max(texture(sampler, vert_uv + dir * 8.0).rgb - THRESHOLD, 0.0);
         }
-        color += bloom * 0.16;
+        color += bloom * 0.13;
 
         // Film grain, reseeded every frame.
         float grain = fract(sin(dot(vert_uv + time, vec2(12.9898, 78.233))) * 43758.5453);

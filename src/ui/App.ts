@@ -1,6 +1,7 @@
 import {html} from "../../lib/html.js";
 import {Action} from "../actions.js";
 import {Game, GameState} from "../game.js";
+import {WEAPONS} from "../weapons.js";
 import {Has} from "../world.js";
 
 /**
@@ -21,11 +22,11 @@ const PANEL = `
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 3vmin;
+    gap: 2.6vmin;
     text-align: center;
-    background: radial-gradient(circle, rgba(0,0,0,.55), rgba(0,0,0,.92));
+    background: radial-gradient(circle, rgba(0,0,0,.55), rgba(0,0,0,.93));
     color: #d8d8dd;
-    font: 2.4vmin monospace;
+    font: 2.2vmin monospace;
     letter-spacing: .3em;
     text-transform: uppercase;
 `;
@@ -41,25 +42,33 @@ const BUTTON = `
 `;
 
 function Screen(game: Game) {
-    let dead = game.State === GameState.Dead;
+    let title = "Shattered Prism";
+    let colour = "#0ff";
+    let line = "Something is loose in the megastructure";
+    let button = "Enter";
+
+    if (game.State === GameState.Dead) {
+        title = "Shattered";
+        colour = "#f0f";
+        line = `${game.Kills} of ${game.Enemies} unmade &middot; you did not get out`;
+        button = "Go back in";
+    } else if (game.State === GameState.Won) {
+        title = "Out";
+        colour = "#0f8";
+        line = `${game.Kills} of ${game.Enemies} unmade &middot; the structure holds`;
+        button = "Again";
+    }
+
     return html`
         <div style="${PANEL}">
-            <div style="font-size: 7vmin; color: ${dead ? "#f0f" : "#0ff"}; letter-spacing: .5em">
-                ${dead ? "Shattered" : "Shattered Prism"}
-            </div>
-            <div>
-                ${dead
-                    ? `Wave ${game.Wave} &middot; ${game.Kills} unicorns unmade`
-                    : "Something is loose in the megastructure"}
-            </div>
-            <div style="opacity: .55; letter-spacing: .18em">
-                WASD move &middot; mouse look &middot; click fire<br />
+            <div style="font-size: 6.5vmin; color: ${colour}; letter-spacing: .5em">${title}</div>
+            <div>${line}</div>
+            <div style="opacity: .55; letter-spacing: .18em; line-height: 1.9">
+                WASD move &middot; mouse look &middot; click fire &middot; 1 2 3 or wheel to swap<br />
                 space jump, again in the air to dash &middot; shift slide<br />
-                kill up close to bleed them for health
+                they only come for you once they see you &middot; find the green door
             </div>
-            <button style="${BUTTON}" onclick="$(${Action.Start})">
-                ${dead ? "Go back in" : "Enter"}
-            </button>
+            <button style="${BUTTON}" onclick="$(${Action.Start})">${button}</button>
         </div>
     `;
 }
@@ -69,9 +78,11 @@ function Hud(game: Game) {
         ? game.World.Health[game.PlayerEntity]
         : {Current: 0, Max: 1};
     let ratio = Math.max(0, health.Current / health.Max);
-    // The bar goes from cyan to magenta as it empties, so the colour alone
-    // tells the player how much trouble they are in.
-    let hue = 180 + (1 - ratio) * 120;
+    // The bar runs from cyan to magenta as it empties, so the colour alone
+    // tells you how much trouble you are in.
+    let hue = (180 + (1 - ratio) * 120).toFixed(0);
+    let weapon = WEAPONS[game.Weapon];
+    let ammo = weapon.MaxAmmo ? `${game.Ammo[game.Weapon]}` : "&infin;";
 
     return html`
         <div
@@ -80,16 +91,14 @@ function Hud(game: Game) {
                 inset: 0;
                 pointer-events: none;
                 color: #d8d8dd;
-                font: 2vmin monospace;
+                font: 1.9vmin monospace;
                 letter-spacing: .3em;
                 text-transform: uppercase;
                 text-shadow: 0 0 1vmin #000;
             "
         >
-            <div style="position: absolute; top: 2vmin; left: 2.5vmin">Wave ${game.Wave}</div>
-            <div style="position: absolute; top: 2vmin; right: 2.5vmin">${game.Kills} kills</div>
-            <div style="position: absolute; top: 2vmin; left: 0; right: 0; text-align: center; opacity: .5">
-                ${game.Alive ? `${game.Alive} left` : "&nbsp;"}
+            <div style="position: absolute; top: 2vmin; left: 2.5vmin">
+                ${game.Kills} / ${game.Enemies} unmade
             </div>
 
             <div
@@ -101,16 +110,27 @@ function Hud(game: Game) {
                     height: 3px;
                     margin: -1.5px 0 0 -1.5px;
                     background: #fff;
-                    opacity: .8;
+                    opacity: .85;
                 "
             ></div>
+
+            <div style="position: absolute; right: 2.5vmin; bottom: 2.6vmin; text-align: right">
+                <div style="font-size: 3.4vmin; color: hsl(${hue}, 100%, 62%)">${ammo}</div>
+                <div style="opacity: .7">${weapon.Name}</div>
+                <div style="opacity: .35; font-size: 1.5vmin; margin-top: .6vmin">
+                    ${WEAPONS.map(
+                        (w, i) =>
+                            `<span style="opacity:${i === game.Weapon ? 1 : 0.4}">${i + 1}</span>`,
+                    ).join(" ")}
+                </div>
+            </div>
 
             <div
                 style="
                     position: absolute;
                     bottom: 3vmin;
-                    left: 25%;
-                    width: 50%;
+                    left: 3vmin;
+                    width: 34%;
                     height: 1.2vmin;
                     border: 1px solid rgba(255,255,255,.25);
                 "
@@ -119,8 +139,8 @@ function Hud(game: Game) {
                     style="
                         width: ${(ratio * 100).toFixed(1)}%;
                         height: 100%;
-                        background: hsl(${hue.toFixed(0)}, 100%, 55%);
-                        box-shadow: 0 0 2vmin hsl(${hue.toFixed(0)}, 100%, 55%);
+                        background: hsl(${hue}, 100%, 55%);
+                        box-shadow: 0 0 2vmin hsl(${hue}, 100%, 55%);
                     "
                 ></div>
             </div>

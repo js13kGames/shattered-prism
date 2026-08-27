@@ -8,36 +8,42 @@ import {render_particles, render_prism} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
+import {Weapon} from "../weapons.js";
 
-export const REBAR_DAMAGE = 34;
-export const REBAR_SPEED = 70;
-/** Rebar is crude concrete, so it is grey and barely glows at all. */
-const REBAR_COLOR: Vec4 = [0.45, 0.45, 0.44, 1];
-
-/** A heavy concrete rebar: a scaled cylinder that flies in a straight line. */
-export function blueprint_rebar(game: Game, owner: Entity) {
+/**
+ * Anything the player fires. The weapon table decides what it looks like, how
+ * hard it hits, and whether it falls.
+ */
+export function blueprint_shot(game: Game, weapon: Weapon, owner: Entity) {
     return [
-        transform(undefined, undefined, [0.12, 1.4, 0.12]),
-        render_prism(game.MeshCylinder, REBAR_COLOR, [1, 0.9, 0.8, 0.2]),
-        collide(true, Layer.Projectile, Layer.Terrain | Layer.Enemy, [0.4, 0.4, 0.4]),
-        // No bounce, no friction, no gravity: a rebar flies dead straight.
-        rigid_body(RigidKind.Dynamic, 0, 0, 0),
-        projectile(REBAR_DAMAGE, owner),
-        lifespan(2.5),
+        transform(undefined, undefined, [...weapon.Size]),
+        render_prism(
+            weapon.Splash ? game.MeshCylinder : game.MeshCube,
+            weapon.Color,
+            [...weapon.Neon, weapon.Splash ? 2.4 : 0.8],
+        ),
+        collide(true, Layer.Projectile, Layer.Terrain | Layer.Enemy, [0.5, 0.5, 0.5]),
+        // No bounce and no friction. Only the mortar feels gravity.
+        rigid_body(RigidKind.Dynamic, 0, 0, weapon.Gravity),
+        projectile(weapon.Damage, weapon.Splash, owner, true, weapon.Neon),
+        lifespan(weapon.Lifespan),
     ];
 }
 
-export const PICKUP_HEAL = 9;
-
-/** A neon pixel shaken loose by a close-range kill. Run into it to heal. */
-export function blueprint_pickup(game: Game, neon: [number, number, number]) {
+/** What the gunners shoot back. */
+export function blueprint_bolt(
+    game: Game,
+    owner: Entity,
+    damage: number,
+    neon: [number, number, number],
+) {
     return [
-        transform(undefined, undefined, [0.28, 0.28, 0.28]),
-        render_prism(game.MeshCube, [0.1, 0.1, 0.1, 1], [...neon, 2.6]),
-        collide(true, Layer.Pickup, Layer.Terrain, [0.5, 0.5, 0.5]),
-        rigid_body(RigidKind.Dynamic, 0.4),
-        pickup(PICKUP_HEAL),
-        lifespan(9),
+        transform(undefined, undefined, [0.3, 0.3, 0.3]),
+        render_prism(game.MeshCube, [0.1, 0.1, 0.1, 1], [...neon, 2.8]),
+        collide(true, Layer.Projectile, Layer.Terrain | Layer.Player, [0.6, 0.6, 0.6]),
+        rigid_body(RigidKind.Dynamic, 0, 0, 0),
+        projectile(damage, 0, owner, false, neon),
+        lifespan(3),
     ];
 }
 
@@ -57,5 +63,20 @@ export function blueprint_burst(
         emit_particles(0.7, 100, speed, 1, count),
         render_particles([...neon, 1], size, [...neon, 0], 0),
         lifespan(0.8),
+    ];
+}
+
+const DROP_COLOR: Vec4 = [0.1, 0.1, 0.1, 1];
+export const DROP_HEAL = 8;
+
+/** A neon pixel shaken loose by a close-range kill. Run into it to heal. */
+export function blueprint_drop(game: Game, neon: [number, number, number]) {
+    return [
+        transform(undefined, undefined, [0.28, 0.28, 0.28]),
+        render_prism(game.MeshCube, DROP_COLOR, [...neon, 2.6]),
+        collide(true, Layer.Pickup, Layer.Terrain, [0.6, 0.6, 0.6]),
+        rigid_body(RigidKind.Dynamic, 0.4),
+        pickup(DROP_HEAL),
+        lifespan(12),
     ];
 }

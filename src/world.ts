@@ -5,7 +5,15 @@ import {Children} from "./components/com_children.js";
 import {Collide} from "./components/com_collide.js";
 import {ControlPlayer} from "./components/com_control_player.js";
 import {EmitParticles} from "./components/com_emit_particles.js";
-import {ControlAi, Health, Pickup, Projectile, Shatter} from "./components/com_gameplay.js";
+import {
+    ControlAi,
+    Health,
+    Pickup,
+    Platform,
+    Projectile,
+    Shatter,
+    Trigger,
+} from "./components/com_gameplay.js";
 import {Lifespan} from "./components/com_lifespan.js";
 import {Light} from "./components/com_light.js";
 import {Move} from "./components/com_move.js";
@@ -29,12 +37,14 @@ const enum Component {
     Light,
     Move,
     Pickup,
+    Platform,
     Projectile,
     Render,
     RigidBody,
     Shake,
     Shatter,
     Transform,
+    Trigger,
 }
 
 export const enum Has {
@@ -53,12 +63,14 @@ export const enum Has {
     Light = 1 << Component.Light,
     Move = 1 << Component.Move,
     Pickup = 1 << Component.Pickup,
+    Platform = 1 << Component.Platform,
     Projectile = 1 << Component.Projectile,
     Render = 1 << Component.Render,
     RigidBody = 1 << Component.RigidBody,
     Shake = 1 << Component.Shake,
     Shatter = 1 << Component.Shatter,
     Transform = 1 << Component.Transform,
+    Trigger = 1 << Component.Trigger,
 }
 
 export class World extends WorldImpl {
@@ -74,10 +86,12 @@ export class World extends WorldImpl {
     Light: Array<Light> = [];
     Move: Array<Move> = [];
     Pickup: Array<Pickup> = [];
+    Platform: Array<Platform> = [];
     Projectile: Array<Projectile> = [];
     Render: Array<Render> = [];
     RigidBody: Array<RigidBody> = [];
     Shake: Array<Shake> = [];
     Shatter: Array<Shatter> = [];
     Transform: Array<Transform> = [];
+    Trigger: Array<Trigger> = [];
 }

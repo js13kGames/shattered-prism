@@ -1,15 +1,20 @@
 /**
  * # sys_light
  *
- * Collect the [lights](com_light.html) in the scene and update the array of
- * light positions and details to be passed to shaders in
- * [sys_render_forward](sys_render_forward.html).
+ * Collect the lights the shader can see this frame.
+ *
+ * The forward pipeline takes eight lights, and a labyrinth has far more lamps
+ * than that, so the sun goes in first and the rest of the slots go to the point
+ * lights nearest the camera. Without the sort, which eight you got would depend
+ * on entity order, and lamps would pop as unrelated entities were created and
+ * destroyed.
  */
 
 import {mat4_get_forward, mat4_get_translation} from "../../lib/mat4.js";
 import {Vec3} from "../../lib/math.js";
+import {vec3_distance_squared} from "../../lib/vec3.js";
 import {Entity} from "../../lib/world.js";
-import {LightKind} from "../../materials/light.js";
+import {LightKind, MAX_FORWARD_LIGHTS} from "../../materials/light.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
@@ -19,34 +24,57 @@ export function sys_light(game: Game, delta: number) {
     game.LightPositions.fill(0);
     game.LightDetails.fill(0);
 
-    let counter = 0;
-    for (let i = 0; i < game.World.Signature.length; i++) {
-        if ((game.World.Signature[i] & QUERY) === QUERY) {
-            update(game, i, counter++);
+    let eye = game.World.Camera[game.PlayerCamera];
+    if (!eye) {
+        return;
+    }
+
+    let slot = 0;
+    candidates.length = 0;
+
+    for (let ent = 0; ent < game.World.Signature.length; ent++) {
+        if ((game.World.Signature[ent] & QUERY) === QUERY) {
+            if (game.World.Light[ent].Kind === LightKind.Directional) {
+                write(game, ent, slot++);
+            } else {
+                mat4_get_translation(world_position, game.World.Transform[ent].World);
+                candidates.push([ent, vec3_distance_squared(world_position, eye.Position)]);
+            }
         }
+    }
+
+    candidates.sort(by_distance);
+
+    for (let i = 0; i < candidates.length && slot < MAX_FORWARD_LIGHTS; i++) {
+        write(game, candidates[i][0], slot++);
     }
 }
 
-let world_pos: Vec3 = [0, 0, 0];
+let candidates: Array<[Entity, number]> = [];
+let world_position: Vec3 = [0, 0, 0];
 
-function update(game: Game, entity: Entity, idx: number) {
+function by_distance(a: [Entity, number], b: [Entity, number]) {
+    return a[1] - b[1];
+}
+
+function write(game: Game, entity: Entity, slot: number) {
     let light = game.World.Light[entity];
     let transform = game.World.Transform[entity];
 
     if (light.Kind === LightKind.Directional) {
         // Directional lights shine backwards, to match the way cameras work.
-        // Rather than the light's world position, store the light's world normal.
-        mat4_get_forward(world_pos, transform.World);
+        // Store the light's world normal rather than its position.
+        mat4_get_forward(world_position, transform.World);
     } else {
-        mat4_get_translation(world_pos, transform.World);
+        mat4_get_translation(world_position, transform.World);
     }
 
-    game.LightPositions[4 * idx + 0] = world_pos[0];
-    game.LightPositions[4 * idx + 1] = world_pos[1];
-    game.LightPositions[4 * idx + 2] = world_pos[2];
-    game.LightPositions[4 * idx + 3] = light.Kind;
-    game.LightDetails[4 * idx + 0] = light.Color[0];
-    game.LightDetails[4 * idx + 1] = light.Color[1];
-    game.LightDetails[4 * idx + 2] = light.Color[2];
-    game.LightDetails[4 * idx + 3] = light.Intensity;
+    game.LightPositions[4 * slot + 0] = world_position[0];
+    game.LightPositions[4 * slot + 1] = world_position[1];
+    game.LightPositions[4 * slot + 2] = world_position[2];
+    game.LightPositions[4 * slot + 3] = light.Kind;
+    game.LightDetails[4 * slot + 0] = light.Color[0];
+    game.LightDetails[4 * slot + 1] = light.Color[1];
+    game.LightDetails[4 * slot + 2] = light.Color[2];
+    game.LightDetails[4 * slot + 3] = light.Intensity;
 }

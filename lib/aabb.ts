@@ -154,3 +154,41 @@ export function intersect_aabb(a: AABB, b: AABB) {
         a.Max[2] > b.Min[2]
     );
 }
+
+/**
+ * Slab test of a ray against an AABB.
+ *
+ * `inverse` is the componentwise reciprocal of the ray direction, computed once
+ * by the caller because a line-of-sight check tests one ray against hundreds of
+ * boxes. Returns the distance along the ray to the entry point, or -1 for a
+ * miss. A ray that starts inside the box returns 0.
+ */
+export function ray_aabb(origin: Vec3, inverse: Vec3, aabb: AABB) {
+    let near = -Infinity;
+    let far = Infinity;
+
+    for (let axis = 0; axis < 3; axis++) {
+        let t1 = (aabb.Min[axis] - origin[axis]) * inverse[axis];
+        let t2 = (aabb.Max[axis] - origin[axis]) * inverse[axis];
+        if (t1 > t2) {
+            let swap = t1;
+            t1 = t2;
+            t2 = swap;
+        }
+        if (t1 > near) {
+            near = t1;
+        }
+        if (t2 < far) {
+            far = t2;
+        }
+        if (near > far) {
+            return -1;
+        }
+    }
+
+    if (far < 0) {
+        return -1;
+    }
+
+    return near < 0 ? 0 : near;
+}

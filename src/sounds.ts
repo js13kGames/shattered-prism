@@ -111,6 +111,142 @@ export let snd_pickup: AudioSynthClip = {
     Exit: 0.12,
 };
 
+/** The shredder: a dry, fast tick. */
+export let snd_shred: AudioSynthClip = {
+    Kind: AudioClipKind.Synth,
+    Tracks: [
+        {
+            Instrument: [
+                4,
+                "highpass",
+                10,
+                2,
+                ,
+                ,
+                ,
+                ,
+                [
+                    [false, 7, 0, 0, 2],
+                    ["square", 5, 0, 0, 2, 5],
+                ],
+            ],
+            Notes: [64],
+        },
+    ],
+    Exit: 0.06,
+};
+
+/** The mortar leaving the tube: a low, hollow thump. */
+export let snd_mortar: AudioSynthClip = {
+    Kind: AudioClipKind.Synth,
+    Tracks: [
+        {
+            Instrument: [
+                7,
+                "lowpass",
+                8,
+                4,
+                ,
+                ,
+                ,
+                ,
+                [
+                    ["sine", 8, 0, 1, 4, 4, , true, 0, 1, 4],
+                    [false, 6, 0, 1, 3],
+                ],
+            ],
+            Notes: [31],
+        },
+    ],
+    Exit: 0.25,
+};
+
+/** The mortar landing. */
+export let snd_boom: AudioSynthClip = {
+    Kind: AudioClipKind.Synth,
+    Tracks: [
+        {
+            Instrument: [
+                8,
+                "lowpass",
+                9,
+                3,
+                ,
+                ,
+                ,
+                ,
+                [
+                    [false, 9, 0, 2, 6],
+                    ["sawtooth", 6, 0, 1, 5, 3],
+                ],
+            ],
+            Notes: [28],
+        },
+    ],
+    Exit: 0.5,
+};
+
+/** An empty chamber. */
+export let snd_dry: AudioSynthClip = {
+    Kind: AudioClipKind.Synth,
+    Tracks: [
+        {
+            Instrument: [3, "highpass", 11, 3, , , , , [[false, 5, 0, 0, 1]]],
+            Notes: [72],
+        },
+    ],
+    Exit: 0.06,
+};
+
+/** Changing weapon: a mechanical clack. */
+export let snd_switch: AudioSynthClip = {
+    Kind: AudioClipKind.Synth,
+    Tracks: [
+        {
+            Instrument: [
+                4,
+                "bandpass",
+                10,
+                4,
+                ,
+                ,
+                ,
+                ,
+                [
+                    [false, 6, 0, 0, 2],
+                    ["square", 4, 0, 0, 2, 8],
+                ],
+            ],
+            Notes: [55],
+        },
+    ],
+    Exit: 0.1,
+};
+
+/** A gunner's bolt. */
+export let snd_bolt: AudioSynthClip = {
+    Kind: AudioClipKind.Synth,
+    Tracks: [
+        {
+            Instrument: [4, "bandpass", 10, 6, , , , , [["sawtooth", 6, 0, 1, 3, 10, , true, 1, 1, 3]]],
+            Notes: [69],
+        },
+    ],
+    Exit: 0.18,
+};
+
+/** A jump pad throwing you into the air. */
+export let snd_pad: AudioSynthClip = {
+    Kind: AudioClipKind.Synth,
+    Tracks: [
+        {
+            Instrument: [5, "bandpass", 9, 5, , , , , [["sine", 8, 0, 1, 4, 6, , true, 1, 2, 4]]],
+            Notes: [52],
+        },
+    ],
+    Exit: 0.3,
+};
+
 /** The neigh: noise pushed through a filter that a saw LFO detunes. */
 export let snd_neigh: AudioSynthClip = {
     Kind: AudioClipKind.Synth,

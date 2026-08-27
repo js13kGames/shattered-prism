@@ -13,6 +13,22 @@
 import {Quat, Vec3} from "../lib/math.js";
 import {quat_align_y} from "../lib/quat.js";
 import {vec3_extend, vec3_normalize} from "../lib/vec3.js";
+import {
+    AMMO,
+    build_grid,
+    cell_level,
+    CRATES,
+    EXIT,
+    GRID_W,
+    LIFTS,
+    MEDKITS,
+    PADS,
+    PILLARS,
+    reachable,
+    SOLID,
+    SPAWNS,
+    START,
+} from "./map.js";
 
 let failures = 0;
 
@@ -99,6 +115,72 @@ function rotate(out: Vec3, q: Quat, v: Vec3) {
     // rather than a downward one from a.
     vec3_extend(out, [0, -2, 0], [0, 9, 0]);
     check("vec3_extend keeps the upward response", out[1] === 9, `${out}`);
+}
+
+// The level has to be finishable, and everything placed in it has to be
+// standing on a floor. Neither is visible from a screenshot, and both are easy
+// to break with one wrong number in the map data.
+{
+    let grid = build_grid();
+    let seen = reachable(grid);
+    let index = (cell: [number, number]) => cell[1] * GRID_W + cell[0];
+
+    check("start is a floor", cell_level(grid, START[0], START[1]) !== SOLID);
+    check("exit is a floor", cell_level(grid, EXIT[0], EXIT[1]) !== SOLID);
+    check("exit is reachable", seen.has(index(EXIT)));
+
+    let solid = (name: string, cells: Array<Array<number>>) => {
+        for (let cell of cells) {
+            let [x, z] = cell;
+            check(`${name} stands on a floor`, cell_level(grid, x, z) !== SOLID, `at ${x},${z}`);
+        }
+    };
+
+    solid("crate", CRATES);
+    solid("pillar", PILLARS);
+    solid("ammo", AMMO);
+    solid("medkit", MEDKITS);
+    solid("lift", LIFTS);
+    solid("pad", PADS);
+
+    for (let spawn of SPAWNS) {
+        for (let node of spawn.Route) {
+            check(
+                "patrol node is a floor",
+                cell_level(grid, node[0], node[1]) !== SOLID,
+                `at ${node}`,
+            );
+            check("patrol node is reachable", seen.has(index(node)), `at ${node}`);
+        }
+    }
+
+    // The AI has no pathfinding: it walks the straight line between route
+    // nodes. So every cell on that line has to be floor, and no two cells in a
+    // row may rise by more than one step, or the enemy walks into a wall for
+    // ever and the patrol silently stops.
+    for (let spawn of SPAWNS) {
+        for (let i = 0; i < spawn.Route.length; i++) {
+            let a = spawn.Route[i];
+            let b = spawn.Route[(i + 1) % spawn.Route.length];
+            let span = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+            let previous = cell_level(grid, a[0], a[1]);
+            let walkable = true;
+
+            for (let s = 1; s <= span * 2; s++) {
+                let t = s / (span * 2);
+                let x = Math.round(a[0] + (b[0] - a[0]) * t);
+                let z = Math.round(a[1] + (b[1] - a[1]) * t);
+                let level = cell_level(grid, x, z);
+                if (level === SOLID || level - previous > 1) {
+                    walkable = false;
+                    break;
+                }
+                previous = level;
+            }
+
+            check("patrol leg is walkable", walkable, `${a} -> ${b}`);
+        }
+    }
 }
 
 // Throwing is how this exits non-zero; naming `process` would mean adding node

@@ -6,6 +6,11 @@ export const enum Attribute {
     Normal,
 }
 
+export interface DepthLayout {
+    Pv: WebGLUniformLocation;
+    World: WebGLUniformLocation;
+}
+
 export interface PrismLayout {
     Pv: WebGLUniformLocation;
     World: WebGLUniformLocation;
@@ -17,6 +22,8 @@ export interface PrismLayout {
     LightDetails: WebGLUniformLocation;
     FogColor: WebGLUniformLocation;
     FogDistance: WebGLUniformLocation;
+    ShadowSpace: WebGLUniformLocation;
+    ShadowMap: WebGLUniformLocation;
 }
 
 export interface PostprocessLayout {
