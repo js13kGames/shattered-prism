@@ -22,9 +22,9 @@ import {Has} from "../world.js";
 const QUERY = Has.ControlAi | Has.Transform | Has.Move | Has.RigidBody;
 
 /** How close a unicorn has to be to bite. */
-const REACH = 3.2;
-const BITE_DAMAGE = 11;
-const BITE_INTERVAL = 1.1;
+const REACH = 2.6;
+const BITE_DAMAGE = 9;
+const BITE_INTERVAL = 1.3;
 const LEAP_RANGE = 16;
 const LEAP_SPEED = 19;
 const LEAP_LIFT = 11;

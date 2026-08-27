@@ -40,6 +40,10 @@ export function blueprint_player(game: Game) {
             transform([0, EYE_HEIGHT, 0]),
             control_player(false, 0, 0.15, -85, 85),
             move(0, 0),
+            // A second channel. One source can only play one clip at a time,
+            // so kills and pickups would be swallowed by the shot they came
+            // from if they shared the root's source.
+            audio_source(false),
             children([
                 transform(undefined, [0, 1, 0, 0]),
                 shake(0),

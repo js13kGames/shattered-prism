@@ -153,5 +153,7 @@ export let snd_drone: AudioSynthClip = {
             Notes: [70, , , , , , , , , , , , 70, , , , , , 70, , , , , , 70],
         },
     ],
-    Exit: 18,
+    // 25 sixteenths at 40 BPM. Exit is the loop length, so it repeats without
+    // a gap when it is used as an idle clip.
+    Exit: 9.37,
 };

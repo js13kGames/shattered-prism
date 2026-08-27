@@ -127,7 +127,7 @@ function kill_unicorn(game: Game, entity: Entity) {
         }
     }
 
-    play(game, game.PlayerEntity, snd_explode);
+    play(game, game.PlayerEye, snd_explode);
     destroy_all(game.World, entity);
     game.Alive--;
     game.Kills++;
@@ -178,7 +178,7 @@ function shatter_prop(game: Game, entity: Entity) {
         body.VelocityLinear[2] = float(-6, 6);
     }
 
-    play(game, game.PlayerEntity, snd_hit);
+    play(game, game.PlayerEye, snd_hit);
 }
 
 let hit_point: Vec3 = [0, 0, 0];
@@ -200,5 +200,5 @@ export function hurt_player(game: Game, amount: number) {
 export function heal_player(game: Game, amount: number) {
     let health = game.World.Health[game.PlayerEntity];
     health.Current = Math.min(health.Max, health.Current + amount);
-    play(game, game.PlayerEntity, snd_pickup);
+    play(game, game.PlayerEye, snd_pickup);
 }

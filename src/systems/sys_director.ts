@@ -47,7 +47,12 @@ export function sys_director(game: Game, delta: number) {
     }
 }
 
-/** Grows fast at first, then keeps climbing, and is capped so the frame is not. */
+/**
+ * One more unicorn per wave, capped so that the frame rate is not.
+ *
+ * The cap matters: every unicorn is a dynamic collider, and dynamic bodies are
+ * checked against each other pairwise.
+ */
 export function wave_size(wave: number) {
-    return Math.min(3 + wave * 2, 26);
+    return Math.min(3 + wave, 20);
 }

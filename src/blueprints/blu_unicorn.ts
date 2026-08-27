@@ -33,7 +33,8 @@ export const UNICORN_HEIGHT = 1.3;
 export function blueprint_unicorn(game: Game, kind: AiKind, neon: [number, number, number]) {
     let dim: Vec4 = [...neon, DIM];
     let glow: Vec4 = [...neon, GLOW];
-    let speed = kind === AiKind.Leaper ? 5 : 7;
+    // Slower than the player's 9, so a crowd can always be kited.
+    let speed = kind === AiKind.Leaper ? 4.5 : 5.5;
 
     return [
         transform(),

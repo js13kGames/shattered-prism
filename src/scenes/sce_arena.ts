@@ -2,9 +2,11 @@ import {instantiate} from "../../lib/game.js";
 import {float, integer, set_seed} from "../../lib/random.js";
 import {blueprint_prop, blueprint_wall} from "../blueprints/blu_arena.js";
 import {blueprint_player} from "../blueprints/blu_player.js";
+import {audio_source} from "../components/com_audio_source.js";
 import {light_directional} from "../components/com_light.js";
 import {set_position, set_rotation, set_scale, transform} from "../components/com_transform.js";
 import {Game} from "../game.js";
+import {snd_drone} from "../sounds.js";
 import {World} from "../world.js";
 
 /** The arena is a circle of this radius inside a square box. */
@@ -65,8 +67,11 @@ export function scene_arena(game: Game) {
         ]);
     }
 
+    // The arena drone, on an entity of its own.
+    instantiate(game, [transform(), audio_source(false, snd_drone)]);
+
     // One cold key light. Everything else in the sky is dead.
-    instantiate(game, [transform(), set_rotation(-60, 35, 0), light_directional([0.7, 0.75, 1], 1.1)]);
+    instantiate(game, [transform(), set_rotation(-60, 35, 0), light_directional([0.85, 0.87, 1], 1)]);
 
     let player = instantiate(game, [...blueprint_player(game), set_position(0, 2, 0)]);
     game.PlayerEntity = player;
