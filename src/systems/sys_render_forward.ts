@@ -4,10 +4,11 @@
  * Render the world into the player's 320x240 target.
  *
  * Three passes over the same entity list: opaque, then transparent particles,
- * then the viewmodel over a cleared depth buffer.
+ * then the viewmodel over a cleared depth buffer. Each pass uses one material.
  */
 
 import {Material} from "../../lib/material.js";
+import {ParticlesColoredLayout, PrismLayout} from "../../materials/layout.js";
 import {
     GL_ARRAY_BUFFER,
     GL_BLEND,
@@ -22,7 +23,7 @@ import {
 } from "../../lib/webgl.js";
 import {Entity} from "../../lib/world.js";
 import {CLEAR_MASK, CameraEye} from "../components/com_camera.js";
-import {FLOATS_PER_PARTICLE, Render, RenderKind, RenderPhase} from "../components/com_render.js";
+import {FLOATS_PER_PARTICLE, RenderKind, RenderPhase} from "../components/com_render.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
@@ -35,10 +36,10 @@ export function sys_render_forward(game: Game, delta: number) {
     game.Gl.clearColor(...camera.ClearColor);
     game.Gl.clear(CLEAR_MASK);
 
-    let current: Material<unknown> | null = null;
     let deferred: Array<Entity> = [];
     let viewmodel: Array<Entity> = [];
 
+    use_material(game, game.MaterialPrism, camera);
     for (let ent = 0; ent < game.World.Signature.length; ent++) {
         if ((game.World.Signature[ent] & QUERY) === QUERY) {
             let phase = game.World.Render[ent].Phase;
@@ -47,7 +48,7 @@ export function sys_render_forward(game: Game, delta: number) {
             } else if (phase === RenderPhase.Viewmodel) {
                 viewmodel.push(ent);
             } else {
-                current = draw(game, ent, camera, current);
+                draw_entity(game, ent);
             }
         }
     }
@@ -55,45 +56,48 @@ export function sys_render_forward(game: Game, delta: number) {
     // Particles are unsorted: every burst is a cloud of one neon, so overlap
     // order does not read.
     game.Gl.enable(GL_BLEND);
+    use_material(game, game.MaterialParticles, camera);
     for (let i = 0; i < deferred.length; i++) {
-        current = draw(game, deferred[i], camera, current);
+        draw_entity(game, deferred[i]);
     }
     game.Gl.disable(GL_BLEND);
 
     if (viewmodel.length) {
         game.Gl.clear(GL_DEPTH_BUFFER_BIT);
+        use_material(game, game.MaterialPrism, camera);
         for (let i = 0; i < viewmodel.length; i++) {
-            current = draw(game, viewmodel[i], camera, current);
+            draw_entity(game, viewmodel[i]);
         }
     }
 }
 
-function draw(game: Game, entity: Entity, eye: CameraEye, current: Material<unknown> | null) {
-    let render = game.World.Render[entity];
-    if (render.Material !== current) {
-        use_material(game, render, eye);
-    }
-    draw_entity(game, entity);
-    return render.Material;
-}
+/**
+ * Switch programs and upload the per-frame uniforms. The prism material is
+ * the only one with lights, fog and a shadow map; the particle material has
+ * nothing but the view.
+ */
+function use_material(
+    game: Game,
+    material: Material<PrismLayout> | Material<ParticlesColoredLayout>,
+    eye: CameraEye,
+) {
+    game.Gl.useProgram(material.Program);
+    game.Gl.uniformMatrix4fv(material.Locations.Pv, false, eye.Pv);
 
-function use_material(game: Game, render: Render, eye: CameraEye) {
-    game.Gl.useProgram(render.Material.Program);
-    game.Gl.uniformMatrix4fv(render.Material.Locations.Pv, false, eye.Pv);
-
-    if (render.Kind === RenderKind.Prism) {
+    if (material === game.MaterialPrism) {
+        let locations = material.Locations as PrismLayout;
         let sun = game.World.Camera[game.Sun];
-        game.Gl.uniform3fv(render.Material.Locations.Eye, eye.Position);
-        game.Gl.uniform4fv(render.Material.Locations.LightPositions, game.LightPositions);
-        game.Gl.uniform4fv(render.Material.Locations.LightDetails, game.LightDetails);
-        game.Gl.uniform4fv(render.Material.Locations.FogColor, eye.FogColor);
-        game.Gl.uniform1f(render.Material.Locations.FogDistance, eye.FogDistance);
-        game.Gl.uniformMatrix4fv(render.Material.Locations.ShadowSpace, false, sun.Pv);
+        game.Gl.uniform3fv(locations.Eye, eye.Position);
+        game.Gl.uniform4fv(locations.LightPositions, game.LightPositions);
+        game.Gl.uniform4fv(locations.LightDetails, game.LightDetails);
+        game.Gl.uniform4fv(locations.FogColor, eye.FogColor);
+        game.Gl.uniform1f(locations.FogDistance, eye.FogDistance);
+        game.Gl.uniformMatrix4fv(locations.ShadowSpace, false, sun.Pv);
 
         // Unit 1: the postprocess pass owns unit 0.
         game.Gl.activeTexture(GL_TEXTURE1);
         game.Gl.bindTexture(GL_TEXTURE_2D, sun.Target.DepthTexture);
-        game.Gl.uniform1i(render.Material.Locations.ShadowMap, 1);
+        game.Gl.uniform1i(locations.ShadowMap, 1);
     }
 }
 

@@ -1,8 +1,13 @@
 import {Mat4, Quat, Vec3} from "./math.js";
 import {vec3_normalize} from "./vec3.js";
 
+/**
+ * A zero matrix. Every matrix in the game is written in full before it is
+ * read (by sys_transform, sys_camera, sys_resize or mat4_from_ortho), so
+ * there is no need to start from the identity.
+ */
 export function mat4_create(): Mat4 {
-    return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    return new Float32Array(16);
 }
 
 export function mat4_invert(out: Mat4, a: Mat4) {

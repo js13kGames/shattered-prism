@@ -26,10 +26,6 @@ export abstract class GameImpl {
     Audio = new AudioContext();
 
     constructor() {
-        document.addEventListener("visibilitychange", () =>
-            document.hidden ? this.Stop() : this.Start(),
-        );
-
         let ui = <K extends keyof HTMLElementEventMap>(
             type: K,
             listener: (evt: HTMLElementEventMap[K]) => void,
@@ -70,7 +66,10 @@ export abstract class GameImpl {
         let last = performance.now();
 
         let tick = (now: number) => {
-            let delta = (now - last) / 1000;
+            // The browser stops animation frames in a hidden tab, so the
+            // first frame back can be minutes late. Cap the step: a huge one
+            // would push the player through the floor.
+            let delta = Math.min((now - last) / 1000, 0.1);
             last = this.Now = now;
 
             this.Running = requestAnimationFrame(tick);
@@ -92,11 +91,6 @@ export abstract class GameImpl {
         };
 
         requestAnimationFrame(tick);
-    }
-
-    Stop() {
-        cancelAnimationFrame(this.Running);
-        this.Running = 0;
     }
 
     abstract FrameUpdate(delta: number): void;

@@ -80,26 +80,29 @@ export class Game extends GameImpl {
     LightDetails = new Float32Array(4 * MAX_FORWARD_LIGHTS);
 
     State = GameState.Title;
-    Kills = 0;
+
+    // Everything below is set by scene_level before the first frame, so the
+    // fields are declared without initializers, which compile to nothing.
+    declare Kills: number;
     /** How many enemies the level started with. */
-    Enemies = 0;
+    declare Enemies: number;
 
     /** The player rig: yaw, pitch, camera, and the gun hanging off the camera. */
-    PlayerEntity = 0;
-    PlayerEye = 0;
-    PlayerCamera = 0;
-    Viewmodel = 0;
+    declare PlayerEntity: number;
+    declare PlayerEye: number;
+    declare PlayerCamera: number;
+    declare Viewmodel: number;
     /** The directional light, which is also the shadow map's camera. */
-    Sun = 0;
+    declare Sun: number;
 
-    Weapon = 0;
-    Ammo: Array<number> = [];
+    declare Weapon: number;
+    declare Ammo: Array<number>;
     /** 1 right after a shot, decaying to 0. Drives the viewmodel kick. */
-    Recoil = 0;
+    declare Recoil: number;
     /** Phase of the walk bob. */
-    Bob = 0;
+    declare Bob: number;
     /** Set by the keyboard system when a movement key is down. */
-    Walking = false;
+    declare Walking: boolean;
 
     override FrameUpdate(delta: number) {
         if (this.State === GameState.Playing) {

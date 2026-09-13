@@ -19,7 +19,8 @@
 
         window.toggle = function toggle(button) {
             if (game.Running) {
-                game.Stop();
+                cancelAnimationFrame(game.Running);
+                game.Running = 0;
                 button.textContent = "resume";
             } else {
                 game.Start();
