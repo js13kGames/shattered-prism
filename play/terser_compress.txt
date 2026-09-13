@@ -7,3 +7,4 @@ unsafe
 unsafe_math
 hoist_funs
 keep_fargs=false
+booleans_as_integers

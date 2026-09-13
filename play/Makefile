@@ -1,11 +1,16 @@
 EXAMPLE ?= src
 SOURCES := $(shell find .. -type f -name "*.ts")
 
+# The day-to-day build packs with fixed parameters, found by one -O2 search,
+# so that two builds of the same code give the same size. The -O1 search is
+# faster than the fixed set but not deterministic: it moves by about 30 bytes
+# between runs. Rerun the search (RELEASE=1) after big changes to the code and
+# paste the parameters it prints here.
 ifeq ($(RELEASE),1)
 	ROADROLLER_FLAGS = -O2
 	ADVZIP_FLAGS = --shrink-insane --iter 10000
 else
-	ROADROLLER_FLAGS = -O1
+	ROADROLLER_FLAGS = -Zab7 -Zdy0 -Zlr930 -Zmc4 -Zpr14 -S0,1,2,3,7,13,21,42,57,82,229,387
 	ADVZIP_FLAGS = --shrink-insane
 endif
 
