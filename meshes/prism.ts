@@ -83,16 +83,13 @@ function attribute(gl: WebGL2RenderingContext, location: Attribute, data: Array<
 }
 
 /**
- * A fullscreen quad in clip space, for the postprocess pass. Positions only;
- * the shader derives UVs from them.
+ * A fullscreen quad in clip space, for the postprocess pass: four positions
+ * drawn as a triangle fan. They run clockwise, like every other mesh, so face
+ * culling keeps them. The shader derives UVs from the positions.
  */
-export function mesh_quad(gl: WebGL2RenderingContext): Mesh {
+export function mesh_quad(gl: WebGL2RenderingContext) {
     let vao = gl.createVertexArray()!;
     gl.bindVertexArray(vao);
-    attribute(gl, Attribute.Position, [-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0]);
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl.createBuffer()!);
-    gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, Uint16Array.from([0, 2, 1, 0, 3, 2]), GL_STATIC_DRAW);
-    gl.bindVertexArray(null);
-
-    return {Vao: vao, IndexCount: 6};
+    attribute(gl, Attribute.Position, [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0]);
+    return vao;
 }

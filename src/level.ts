@@ -192,12 +192,8 @@ function box(
 
 function build_floors(game: Game, grid: Grid) {
     // One pass per distinct floor level, so that each merged slab is flat.
-    let levels = new Set<number>();
-    for (let i = 0; i < grid.Floor.length; i++) {
-        if (grid.Floor[i] !== SOLID) {
-            levels.add(grid.Floor[i]);
-        }
-    }
+    let levels = new Set(grid.Floor);
+    levels.delete(SOLID);
 
     for (let level of levels) {
         for (let rect of merge((i) => grid.Floor[i] === level)) {

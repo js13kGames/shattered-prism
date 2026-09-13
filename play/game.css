@@ -13,12 +13,6 @@ main {
     user-select: none;
     touch-action: none;
 }
-[hidden] {
-    display: none;
-}
 [onclick] {
     cursor: pointer;
-}
-.grabbing {
-    cursor: grabbing;
 }

@@ -9,8 +9,7 @@ import {
     GL_FRAMEBUFFER,
     GL_TEXTURE0,
     GL_TEXTURE_2D,
-    GL_TRIANGLES,
-    GL_UNSIGNED_SHORT,
+    GL_TRIANGLE_FAN,
 } from "../../lib/webgl.js";
 import {Game} from "../game.js";
 
@@ -28,8 +27,8 @@ export function sys_render_postprocess(game: Game, delta: number) {
     // losing precision over a long session.
     game.Gl.uniform1f(material.Locations.Time, (game.Now / 1000) % 100);
 
-    game.Gl.bindVertexArray(game.MeshQuad.Vao);
+    game.Gl.bindVertexArray(game.MeshQuad);
     // The canvas depth buffer is clear at the start of every frame, so the
     // quad passes the depth test without turning the test off.
-    game.Gl.drawElements(GL_TRIANGLES, game.MeshQuad.IndexCount, GL_UNSIGNED_SHORT, 0);
+    game.Gl.drawArrays(GL_TRIANGLE_FAN, 0, 4);
 }

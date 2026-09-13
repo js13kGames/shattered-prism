@@ -13,7 +13,9 @@
 const fs = require("fs");
 
 const SHADER = /(["`])#version 300 es(?:\\n|\n)((?:[^"`\\]|\\.)*?)\1/g;
-const LOOKUP = /(get(?:Uniform|Attrib)Location\(\w+, ")(\w+)(")/g;
+// A uniform is looked up through a local helper, uniform("name"); an attribute
+// directly, with gl.getAttribLocation(program, "name").
+const LOOKUP = /((?:\buniform\(|getAttribLocation\(\w+, )")(\w+)(")/g;
 
 let js = fs.readFileSync(0, "utf8");
 let shaders = [];
@@ -89,12 +91,19 @@ let rename = (glsl) =>
 js = js.replace(/\0(\d+)\0/g, (all, index) => rename(shaders[index]));
 
 let missing = [];
+let lookups = 0;
 js = js.replace(LOOKUP, (all, before, name, after) => {
+    lookups++;
     if (!map.has(name) && !shaders.some((glsl) => new RegExp(`\\b${name}\\b`).test(glsl))) {
         missing.push(name);
     }
     return before + (map.get(name) || name) + after;
 });
+
+if (lookups === 0) {
+    console.error("glsl.cjs: no uniform or attribute lookups found; did their shape change?");
+    process.exit(1);
+}
 
 if (missing.length) {
     console.error("glsl.cjs: lookups of names no shader declares: " + missing.join(", "));

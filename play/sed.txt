@@ -1,5 +1,5 @@
-# Remove strict mode
-s/'use strict';//
+# Remove strict mode. esbuild writes it with double quotes.
+s/["']use strict["'];//
 
 # Remove indents
 s/^ *//

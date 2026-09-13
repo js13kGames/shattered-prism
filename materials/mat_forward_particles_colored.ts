@@ -42,14 +42,15 @@ export function mat_forward_particles_colored(
     gl: WebGL2RenderingContext,
 ): Material<ParticlesColoredLayout> {
     let program = link(gl, vertex, fragment);
+    let uniform = (name: string) => gl.getUniformLocation(program, name)!;
     return {
         Program: program,
         Locations: {
-            Pv: gl.getUniformLocation(program, "pv")!,
+            Pv: uniform("pv"),
 
-            ColorStart: gl.getUniformLocation(program, "color_start")!,
-            ColorEnd: gl.getUniformLocation(program, "color_end")!,
-            Details: gl.getUniformLocation(program, "details")!,
+            ColorStart: uniform("color_start"),
+            ColorEnd: uniform("color_end"),
+            Details: uniform("details"),
 
             OriginAge: gl.getAttribLocation(program, "attr_origin_age")!,
             Direction: gl.getAttribLocation(program, "attr_direction")!,

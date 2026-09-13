@@ -121,21 +121,22 @@ let fragment = `#version 300 es\n
 
 export function mat_forward_prism(gl: WebGL2RenderingContext): Material<PrismLayout> {
     let program = link(gl, vertex, fragment);
+    let uniform = (name: string) => gl.getUniformLocation(program, name)!;
     return {
         Program: program,
         Locations: {
-            Pv: gl.getUniformLocation(program, "pv")!,
-            World: gl.getUniformLocation(program, "world")!,
-            Self: gl.getUniformLocation(program, "self")!,
-            DiffuseColor: gl.getUniformLocation(program, "diffuse_color")!,
-            EmissiveColor: gl.getUniformLocation(program, "emissive_color")!,
-            Eye: gl.getUniformLocation(program, "eye")!,
-            LightPositions: gl.getUniformLocation(program, "light_positions")!,
-            LightDetails: gl.getUniformLocation(program, "light_details")!,
-            FogColor: gl.getUniformLocation(program, "fog_color")!,
-            FogDistance: gl.getUniformLocation(program, "fog_distance")!,
-            ShadowSpace: gl.getUniformLocation(program, "shadow_space")!,
-            ShadowMap: gl.getUniformLocation(program, "shadow_map")!,
+            Pv: uniform("pv"),
+            World: uniform("world"),
+            Self: uniform("self"),
+            DiffuseColor: uniform("diffuse_color"),
+            EmissiveColor: uniform("emissive_color"),
+            Eye: uniform("eye"),
+            LightPositions: uniform("light_positions"),
+            LightDetails: uniform("light_details"),
+            FogColor: uniform("fog_color"),
+            FogDistance: uniform("fog_distance"),
+            ShadowSpace: uniform("shadow_space"),
+            ShadowMap: uniform("shadow_map"),
         },
     };
 }

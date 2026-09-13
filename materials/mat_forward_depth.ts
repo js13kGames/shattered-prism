@@ -26,11 +26,12 @@ let fragment = `#version 300 es\n
 
 export function mat_forward_depth(gl: WebGL2RenderingContext): Material<DepthLayout> {
     let program = link(gl, vertex, fragment);
+    let uniform = (name: string) => gl.getUniformLocation(program, name)!;
     return {
         Program: program,
         Locations: {
-            Pv: gl.getUniformLocation(program, "pv")!,
-            World: gl.getUniformLocation(program, "world")!,
+            Pv: uniform("pv"),
+            World: uniform("world"),
         },
     };
 }

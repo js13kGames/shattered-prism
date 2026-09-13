@@ -30,20 +30,20 @@ export abstract class GameImpl {
             document.hidden ? this.Stop() : this.Start(),
         );
 
-        this.Ui.addEventListener("contextmenu", (evt) => evt.preventDefault());
-        this.Ui.addEventListener("click", () => this.Ui.requestPointerLock());
+        let ui = <K extends keyof HTMLElementEventMap>(
+            type: K,
+            listener: (evt: HTMLElementEventMap[K]) => void,
+        ) => this.Ui.addEventListener(type, listener);
 
-        this.Ui.addEventListener("mousedown", (evt) => {
-            this.InputState["Mouse" + evt.button] = 1;
-        });
-        this.Ui.addEventListener("mouseup", (evt) => {
-            this.InputState["Mouse" + evt.button] = 0;
-        });
-        this.Ui.addEventListener("mousemove", (evt) => {
+        ui("contextmenu", (evt) => evt.preventDefault());
+        ui("click", () => this.Ui.requestPointerLock());
+        ui("mousedown", (evt) => (this.InputState["Mouse" + evt.button] = 1));
+        ui("mouseup", (evt) => (this.InputState["Mouse" + evt.button] = 0));
+        ui("mousemove", (evt) => {
             this.InputDelta["MouseX"] = evt.movementX;
             this.InputDelta["MouseY"] = evt.movementY;
         });
-        this.Ui.addEventListener("wheel", (evt) => {
+        ui("wheel", (evt) => {
             evt.preventDefault();
             this.InputDelta["WheelY"] = evt.deltaY;
         });

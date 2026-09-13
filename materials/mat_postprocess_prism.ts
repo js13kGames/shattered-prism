@@ -61,11 +61,12 @@ let fragment = `#version 300 es\n
 
 export function mat_postprocess_prism(gl: WebGL2RenderingContext): Material<PostprocessLayout> {
     let program = link(gl, vertex, fragment);
+    let uniform = (name: string) => gl.getUniformLocation(program, name)!;
     return {
         Program: program,
         Locations: {
-            Sampler: gl.getUniformLocation(program, "sampler")!,
-            Time: gl.getUniformLocation(program, "time")!,
+            Sampler: uniform("sampler"),
+            Time: uniform("time"),
         },
     };
 }
