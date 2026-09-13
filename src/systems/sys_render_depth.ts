@@ -55,6 +55,4 @@ export function sys_render_depth(game: Game, delta: number) {
             game.Gl.drawElements(GL_TRIANGLES, render.Mesh.IndexCount, GL_UNSIGNED_SHORT, 0);
         }
     }
-
-    game.Gl.bindVertexArray(null);
 }

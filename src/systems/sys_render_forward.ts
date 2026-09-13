@@ -66,8 +66,6 @@ export function sys_render_forward(game: Game, delta: number) {
             current = draw(game, viewmodel[i], camera, current);
         }
     }
-
-    game.Gl.bindVertexArray(null);
 }
 
 function draw(game: Game, entity: Entity, eye: CameraEye, current: Material<unknown> | null) {

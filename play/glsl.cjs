@@ -23,6 +23,10 @@ js = js.replace(SHADER, (all, quote, body) => {
         .replace(/\\n|\n/g, " ")
         .replace(/\s+/g, " ")
         .replace(/ ?([\[\]{}();,=+\-*/<>!&|?:.]) ?/g, "$1")
+        // 1.0 is 1. and 0.5 is .5. The digits inside ${...} are JavaScript.
+        .replace(/\$\{[^}]*\}|(\d)\.0+(?!\d)|\b0\.(?=\d)/g, (all, digit) =>
+            all.startsWith("${") ? all : digit !== undefined ? digit + "." : ".",
+        )
         .trim();
     shaders.push(glsl);
     return quote + "#version 300 es\\n\0" + (shaders.length - 1) + "\0" + quote;

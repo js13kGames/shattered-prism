@@ -84,6 +84,9 @@ export function play_note(
     let time = audio.currentTime + offset;
     let total_duration = 0;
 
+    // Everything ends up in the panner when there is one, and the panner in
+    // the speakers.
+    let output = panner || audio.destination;
     if (panner) {
         panner.connect(audio.destination);
     }
@@ -115,15 +118,9 @@ export function play_note(
         }
 
         master.connect(filter);
-        if (panner) {
-            filter.connect(panner);
-        } else {
-            filter.connect(audio.destination);
-        }
-    } else if (panner) {
-        master.connect(panner);
+        filter.connect(output);
     } else {
-        master.connect(audio.destination);
+        master.connect(output);
     }
 
     for (let source of instr[InstrumentParam.Sources]) {
