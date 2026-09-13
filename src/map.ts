@@ -182,29 +182,23 @@ export interface Spawn {
 export const SPAWNS: Array<Spawn> = [
     // South corridor.
     {Kind: EnemyKind.Sentinel, Route: [[13, 29], [19, 29]]},
-    {Kind: EnemyKind.Gunner, Route: [[17, 29], [12, 29]]},
     // Start room, one slow patrol.
     {Kind: EnemyKind.Sentinel, Route: [[8, 27], [9, 30]]},
     // West wing.
-    {Kind: EnemyKind.Sentinel, Route: [[4, 15], [4, 21], [6, 21], [6, 15]]},
     {Kind: EnemyKind.Hound, Route: [[6, 18]]},
     // Courtyard.
     {Kind: EnemyKind.Hound, Route: [[11, 14]]},
-    {Kind: EnemyKind.Hound, Route: [[17, 23]]},
     {Kind: EnemyKind.Gunner, Route: [[10, 17], [18, 17]]},
-    {Kind: EnemyKind.Sentinel, Route: [[13, 13], [13, 23]]},
     // Stair hall.
     {Kind: EnemyKind.Gunner, Route: [[24, 30], [24, 26]]},
     // Balcony.
     {Kind: EnemyKind.Gunner, Route: [[22, 14], [33, 14]]},
-    {Kind: EnemyKind.Gunner, Route: [[33, 22], [22, 22]]},
     {Kind: EnemyKind.Sentinel, Route: [[25, 13], [25, 22], [32, 22], [32, 13]]},
     {Kind: EnemyKind.Hound, Route: [[28, 18]]},
     // North corridor.
     {Kind: EnemyKind.Sentinel, Route: [[29, 7], [29, 11]]},
     // Chasm ledges.
     {Kind: EnemyKind.Gunner, Route: [[16, 6], [29, 6]]},
-    {Kind: EnemyKind.Gunner, Route: [[28, 2], [16, 2]]},
     // Exit room. The last two are waiting for you.
     {Kind: EnemyKind.Sentinel, Route: [[32, 3], [35, 6]]},
     {Kind: EnemyKind.Hound, Route: [[35, 3]]},
