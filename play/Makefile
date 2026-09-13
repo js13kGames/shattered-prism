@@ -10,7 +10,7 @@ ifeq ($(RELEASE),1)
 	ROADROLLER_FLAGS = -O2
 	ADVZIP_FLAGS = --shrink-insane --iter 10000
 else
-	ROADROLLER_FLAGS = -Zab7 -Zdy0 -Zlr930 -Zmc4 -Zpr14 -S0,1,2,3,7,13,21,42,57,82,229,387
+	ROADROLLER_FLAGS = -Zab7 -Zdy0 -Zlr1098 -Zmc4 -Zpr14 -S0,1,2,3,6,7,13,21,57,90,227,394
 	ADVZIP_FLAGS = --shrink-insane
 endif
 

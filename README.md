@@ -105,11 +105,13 @@ camera.
 Every commit message ends with the size of `play/index.zip` in bytes.
 
 The target is 13,312 bytes. The labyrinth version started at 15,528 bytes. The
-removal of unused code and the shader build step brought it to approximately
-13,650 bytes, and to 13,606 bytes with `RELEASE=1`.
+removal of unused code, the shader build step and a smaller HTML shell brought
+it under the target.
 
-The packer is not deterministic. The same code can give a zip that is 30 bytes
-larger or smaller. Compare sizes over more than one build.
+The packer parameters are fixed in `play/Makefile`, so two builds of the same
+code give the same size. `RELEASE=1` runs the parameter search again, which is
+slow and can find a smaller result. Paste the parameters it prints into the
+Makefile after a large change to the code.
 
 Shorter code does not always give a smaller zip. The packer already compresses
 repeated code very well. To make the zip smaller, remove code that is unique.
