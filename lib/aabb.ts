@@ -1,6 +1,6 @@
-import {mat4_get_scaling, mat4_get_translation} from "./mat4.js";
+import {mat4_get_translation} from "./mat4.js";
 import {Mat4, Vec3} from "./math.js";
-import {vec3_add, vec3_scale, vec3_subtract, vec3_transform_position} from "./vec3.js";
+import {vec3_add, vec3_subtract} from "./vec3.js";
 
 export interface AABB {
     /** The size of the collider in self units. */
@@ -15,114 +15,27 @@ export interface AABB {
     Half: [x: number, y: number, z: number];
 }
 
-const BOX: Array<Vec3> = [
-    [0.5, 0.5, 0.5],
-    [0.5, 0.5, -0.5],
-    [-0.5, 0.5, -0.5],
-    [-0.5, 0.5, 0.5],
-    [0.5, -0.5, 0.5],
-    [0.5, -0.5, -0.5],
-    [-0.5, -0.5, -0.5],
-    [-0.5, -0.5, 0.5],
-];
-
 /**
- * Compute the AABB based on the translation, rotation and scale of the
- * transform.
+ * Compute the world AABB of the collider's box, rotated, scaled and moved by
+ * the transform.
  *
- * This is the most accurate function from the compute_aabb family.
+ * The half-extent on each world axis is the sum of the box's scaled axes
+ * projected onto it, which is the absolute value of the matrix applied to the
+ * half size. It gives exactly the same box as transforming the eight corners.
  */
 export function compute_aabb(world: Mat4, aabb: AABB) {
     mat4_get_translation(aabb.Center, world);
 
-    // Start with the extents on each axis set to the position of the center.
-    let min_x, min_y, min_z, max_x, max_y, max_z;
-    min_x = max_x = aabb.Center[0];
-    min_y = max_y = aabb.Center[1];
-    min_z = max_z = aabb.Center[2];
-
-    // Expand the extents outwards from the center by finding the farthest
-    // vertex on each axis in both the negative and the positive direction.
-    let world_vertex: Vec3 = [0, 0, 0];
-    for (let i = 0; i < 8; i++) {
-        let bb_vertex = BOX[i];
-
-        // Scale the bounding box according to the size of the collider.
-        world_vertex[0] = bb_vertex[0] * aabb.Size[0];
-        world_vertex[1] = bb_vertex[1] * aabb.Size[1];
-        world_vertex[2] = bb_vertex[2] * aabb.Size[2];
-
-        vec3_transform_position(world_vertex, world_vertex, world);
-        if (world_vertex[0] < min_x) {
-            min_x = world_vertex[0];
-        }
-        if (world_vertex[0] > max_x) {
-            max_x = world_vertex[0];
-        }
-        if (world_vertex[1] < min_y) {
-            min_y = world_vertex[1];
-        }
-        if (world_vertex[1] > max_y) {
-            max_y = world_vertex[1];
-        }
-        if (world_vertex[2] < min_z) {
-            min_z = world_vertex[2];
-        }
-        if (world_vertex[2] > max_z) {
-            max_z = world_vertex[2];
-        }
+    for (let i = 0; i < 3; i++) {
+        aabb.Half[i] =
+            (Math.abs(world[i]) * aabb.Size[0] +
+                Math.abs(world[4 + i]) * aabb.Size[1] +
+                Math.abs(world[8 + i]) * aabb.Size[2]) /
+            2;
     }
 
-    // Save the min and max bounds.
-    aabb.Min = [min_x, min_y, min_z];
-    aabb.Max = [max_x, max_y, max_z];
-
-    // Calculate the half-extents.
-    aabb.Half[0] = (max_x - min_x) / 2;
-    aabb.Half[1] = (max_y - min_y) / 2;
-    aabb.Half[2] = (max_z - min_z) / 2;
-}
-
-const world_scale: Vec3 = [0, 0, 0];
-
-/**
- * Compute the AABB based on the translation and scale of the transform.
- *
- * Assume [0, 0, 0, 1] rotation, which is to say that the scaling will align
- * with the world's axes (e.g. the scale of [2, 1, 1] will scale the AABB on the
- * world's X axis regardless of the transform's coordinate system). For best
- * results the scaling should be uniform or the transform should not be rotated.
- */
-export function compute_aabb_without_rotation(world: Mat4, aabb: AABB) {
-    mat4_get_translation(aabb.Center, world);
-    mat4_get_scaling(world_scale, world);
-
-    // Calculate the half-extents.
-    aabb.Half[0] = (aabb.Size[0] / 2) * world_scale[0];
-    aabb.Half[1] = (aabb.Size[1] / 2) * world_scale[1];
-    aabb.Half[2] = (aabb.Size[2] / 2) * world_scale[2];
-
-    // Save the min and max bounds.
-    vec3_subtract(aabb.Min, aabb.Center, aabb.Half);
-    vec3_add(aabb.Max, aabb.Center, aabb.Half);
-}
-
-/**
- * Compute the AABB based on the translation of the transform and the Size
- * property of the collider.
- *
- * This is the simplest function from the compute_aabb family and requires the
- * collider to have a Size property.
- */
-export function compute_aabb_without_rotation_scale(world: Mat4, aabb: AABB) {
-    mat4_get_translation(aabb.Center, world);
-
-    // Calculate the half-extents.
-    vec3_scale(aabb.Half, aabb.Size, 0.5);
-
-    // Save the min and max bounds.
-    vec3_subtract(aabb.Min, aabb.Center, aabb.Half);
-    vec3_add(aabb.Max, aabb.Center, aabb.Half);
+    aabb.Min = vec3_subtract([0, 0, 0], aabb.Center, aabb.Half);
+    aabb.Max = vec3_add([0, 0, 0], aabb.Center, aabb.Half);
 }
 
 export function penetrate_aabb(a: AABB, b: AABB): Vec3 {

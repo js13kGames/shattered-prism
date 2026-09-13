@@ -4,15 +4,25 @@
  * Run it with `npm run selftest`. Nothing imports this file, so it costs the
  * game zero bytes.
  *
- * It covers the two pieces of maths in the project that are neither obvious nor
- * visible when they go wrong: the rotation that points a cylinder at something,
- * and the vector merge that combines several collision responses into one. Both
- * fail silently and look like a physics mood rather than a bug.
+ * It covers the maths in the project that is neither obvious nor visible when
+ * it goes wrong: the rotation that points a cylinder at something, the vector
+ * merge that combines several collision responses into one, the inverse
+ * transform that the camera and the normals use, and the world box of a
+ * rotated collider. They fail silently and look like a physics mood, or a
+ * camera mood, rather than a bug.
  */
 
+import {AABB, compute_aabb} from "../lib/aabb.js";
+import {
+    mat4_compose,
+    mat4_compose_inverse,
+    mat4_create,
+    mat4_invert,
+    mat4_multiply,
+} from "../lib/mat4.js";
 import {Quat, Vec3} from "../lib/math.js";
-import {quat_align_y} from "../lib/quat.js";
-import {vec3_extend, vec3_normalize} from "../lib/vec3.js";
+import {quat_align_y, quat_from_euler} from "../lib/quat.js";
+import {vec3_extend, vec3_normalize, vec3_transform_position} from "../lib/vec3.js";
 import {
     AMMO,
     build_grid,
@@ -79,7 +89,9 @@ function rotate(out: Vec3, q: Quat, v: Vec3) {
         rotate(got, q, [0, 1, 0]);
         check(
             "quat_align_y",
-            close(got[0], direction[0]) && close(got[1], direction[1]) && close(got[2], direction[2]),
+            close(got[0], direction[0]) &&
+                close(got[1], direction[1]) &&
+                close(got[2], direction[2]),
             `for ${direction} got ${got.map((n) => n.toFixed(3))}`,
         );
         check(
@@ -155,9 +167,7 @@ function rotate(out: Vec3, q: Quat, v: Vec3) {
     }
 
     // Pillars and crates are solid, and the AI cannot path around them.
-    let obstacles = new Set(
-        [...PILLARS, ...CRATES].map((cell) => cell[1] * GRID_W + cell[0]),
-    );
+    let obstacles = new Set([...PILLARS, ...CRATES].map((cell) => cell[1] * GRID_W + cell[0]));
     let blocked = (a: Array<number>, b: Array<number>) => {
         let span = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
         for (let s = 0; s <= span * 2; s++) {
@@ -206,6 +216,93 @@ function rotate(out: Vec3, q: Quat, v: Vec3) {
             check("patrol leg is walkable", walkable, `${a} -> ${b}`);
             check("patrol leg is unobstructed", !blocked(a, b), `${a} -> ${b}`);
         }
+    }
+}
+
+// mat4_compose_inverse must be the true inverse of mat4_compose, alone and down
+// a parent chain, where Self is built as the local inverse times the parent's.
+{
+    let parent_world = mat4_compose(
+        mat4_create(),
+        quat_from_euler([0, 0, 0, 1], 20, -35, 5),
+        [3, -2, 7],
+        [2, 0.5, 1.5],
+    );
+    let parent_self = mat4_compose_inverse(
+        mat4_create(),
+        quat_from_euler([0, 0, 0, 1], 20, -35, 5),
+        [3, -2, 7],
+        [2, 0.5, 1.5],
+    );
+    let rotation = quat_from_euler([0, 0, 0, 1], -60, 110, 30);
+    let world = mat4_multiply(
+        mat4_create(),
+        parent_world,
+        mat4_compose(mat4_create(), rotation, [0.26, -0.23, -0.55], [0.42, 0.9, 1.3]),
+    );
+    let self = mat4_multiply(
+        mat4_create(),
+        mat4_compose_inverse(mat4_create(), rotation, [0.26, -0.23, -0.55], [0.42, 0.9, 1.3]),
+        parent_self,
+    );
+    let reference = mat4_invert(mat4_create(), world)!;
+    let product = mat4_multiply(mat4_create(), world, self);
+    for (let i = 0; i < 16; i++) {
+        check(
+            "mat4_compose_inverse matches mat4_invert",
+            close(self[i], reference[i]),
+            `at ${i}: ${self[i]} vs ${reference[i]}`,
+        );
+        check(
+            "world times self is the identity",
+            close(product[i], i % 5 === 0 ? 1 : 0),
+            `at ${i}: ${product[i]}`,
+        );
+    }
+}
+
+// compute_aabb takes the box from the absolute matrix. It must give the same box
+// as transforming the eight corners of the collider.
+{
+    let world = mat4_compose(
+        mat4_create(),
+        quat_from_euler([0, 0, 0, 1], 15, 40, -70),
+        [-5, 1, 9],
+        [1.8, 0.6, 3],
+    );
+    let aabb: AABB = {
+        Size: [1.4, 2.7, 2.2],
+        Min: [0, 0, 0],
+        Max: [0, 0, 0],
+        Center: [0, 0, 0],
+        Half: [0, 0, 0],
+    };
+    compute_aabb(world, aabb);
+    let min = [Infinity, Infinity, Infinity];
+    let max = [-Infinity, -Infinity, -Infinity];
+    for (let corner = 0; corner < 8; corner++) {
+        let point: Vec3 = [
+            (corner & 1 ? 0.5 : -0.5) * aabb.Size[0],
+            (corner & 2 ? 0.5 : -0.5) * aabb.Size[1],
+            (corner & 4 ? 0.5 : -0.5) * aabb.Size[2],
+        ];
+        vec3_transform_position(point, point, world);
+        for (let axis = 0; axis < 3; axis++) {
+            min[axis] = Math.min(min[axis], point[axis]);
+            max[axis] = Math.max(max[axis], point[axis]);
+        }
+    }
+    for (let axis = 0; axis < 3; axis++) {
+        check(
+            "compute_aabb min matches the corners",
+            close(aabb.Min[axis], min[axis]),
+            `${aabb.Min} vs ${min}`,
+        );
+        check(
+            "compute_aabb max matches the corners",
+            close(aabb.Max[axis], max[axis]),
+            `${aabb.Max} vs ${max}`,
+        );
     }
 }
 

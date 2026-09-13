@@ -20,7 +20,7 @@
  * run during the frame.
  */
 
-import {mat4_compose, mat4_invert, mat4_multiply} from "../../lib/mat4.js";
+import {mat4_compose, mat4_compose_inverse, mat4_multiply} from "../../lib/mat4.js";
 import {Entity} from "../../lib/world.js";
 import {Transform} from "../components/com_transform.js";
 import {Game} from "../game.js";
@@ -41,13 +41,15 @@ function update_transform(world: World, entity: Entity, transform: Transform) {
     world.Signature[entity] &= ~Has.Dirty;
 
     mat4_compose(transform.World, transform.Rotation, transform.Translation, transform.Scale);
+    mat4_compose_inverse(transform.Self, transform.Rotation, transform.Translation, transform.Scale);
 
     if (transform.Parent !== undefined) {
+        // World is the parent's world times the local matrix, so Self, its
+        // inverse, is the local inverse times the parent's Self.
         let parent_transform = world.Transform[transform.Parent];
         mat4_multiply(transform.World, parent_transform.World, transform.World);
+        mat4_multiply(transform.Self, transform.Self, parent_transform.Self);
     }
-
-    mat4_invert(transform.Self, transform.World);
 
     if (world.Signature[entity] & Has.Children) {
         let children = world.Children[entity];

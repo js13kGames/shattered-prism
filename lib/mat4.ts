@@ -213,6 +213,52 @@ export function mat4_compose(out: Mat4, q: Quat, v: Vec3, s: Vec3) {
     return out;
 }
 
+/**
+ * The inverse of `mat4_compose`: the matrix that takes a point from the parent
+ * space back into self space. For a rotation, a translation and a scale it is
+ * the inverse scale times the transposed rotation, moved by the rotated,
+ * inversely scaled translation. It assumes a unit quaternion and a scale with
+ * no zero, like everything in the game.
+ */
+export function mat4_compose_inverse(out: Mat4, q: Quat, v: Vec3, s: Vec3) {
+    let x = q[0],
+        y = q[1],
+        z = q[2],
+        w = q[3];
+    let x2 = x + x;
+    let y2 = y + y;
+    let z2 = z + z;
+    let xx = x * x2;
+    let xy = x * y2;
+    let xz = x * z2;
+    let yy = y * y2;
+    let yz = y * z2;
+    let zz = z * z2;
+    let wx = w * x2;
+    let wy = w * y2;
+    let wz = w * z2;
+    let sx = s[0];
+    let sy = s[1];
+    let sz = s[2];
+    out[0] = (1 - (yy + zz)) / sx;
+    out[1] = (xy - wz) / sy;
+    out[2] = (xz + wy) / sz;
+    out[3] = 0;
+    out[4] = (xy + wz) / sx;
+    out[5] = (1 - (xx + zz)) / sy;
+    out[6] = (yz - wx) / sz;
+    out[7] = 0;
+    out[8] = (xz - wy) / sx;
+    out[9] = (yz + wx) / sy;
+    out[10] = (1 - (xx + yy)) / sz;
+    out[11] = 0;
+    out[12] = -(out[0] * v[0] + out[4] * v[1] + out[8] * v[2]);
+    out[13] = -(out[1] * v[0] + out[5] * v[1] + out[9] * v[2]);
+    out[14] = -(out[2] * v[0] + out[6] * v[1] + out[10] * v[2]);
+    out[15] = 1;
+    return out;
+}
+
 export function mat4_from_perspective(
     out: Mat4,
     fovy: number,
