@@ -1,5 +1,4 @@
 import {link, Material} from "../lib/material.js";
-import {GL_TRIANGLES} from "../lib/webgl.js";
 import {Attribute, PrismLayout} from "./layout.js";
 import {LightKind, MAX_FORWARD_LIGHTS} from "./light.js";
 
@@ -123,7 +122,6 @@ let fragment = `#version 300 es\n
 export function mat_forward_prism(gl: WebGL2RenderingContext): Material<PrismLayout> {
     let program = link(gl, vertex, fragment);
     return {
-        Mode: GL_TRIANGLES,
         Program: program,
         Locations: {
             Pv: gl.getUniformLocation(program, "pv")!,

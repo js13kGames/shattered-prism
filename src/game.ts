@@ -1,11 +1,5 @@
-import {create_depth_target, create_forward_target, DepthTarget, ForwardTarget} from "../lib/framebuffer.js";
-import {Game3D} from "../lib/game.js";
-import {
-    GL_NEAREST,
-    GL_TEXTURE_2D,
-    GL_TEXTURE_MAG_FILTER,
-    GL_TEXTURE_MIN_FILTER,
-} from "../lib/webgl.js";
+import {create_target} from "../lib/framebuffer.js";
+import {GameImpl} from "../lib/game.js";
 import {MAX_FORWARD_LIGHTS} from "../materials/light.js";
 import {mat_forward_depth} from "../materials/mat_forward_depth.js";
 import {mat_forward_particles_colored} from "../materials/mat_forward_particles_colored.js";
@@ -63,7 +57,7 @@ export const enum Layer {
     Trigger = 32,
 }
 
-export class Game extends Game3D {
+export class Game extends GameImpl {
     World = new World();
 
     MaterialPrism = mat_forward_prism(this.Gl);
@@ -77,7 +71,10 @@ export class Game extends Game3D {
     MeshCylinder = mesh_prism(this.Gl, 8, 0.5);
     MeshQuad = mesh_quad(this.Gl);
 
-    override Targets: {Scene: ForwardTarget; Sun: DepthTarget};
+    Targets = {
+        Scene: create_target(this.Gl, RENDER_WIDTH, RENDER_HEIGHT),
+        Sun: create_target(this.Gl, SHADOW_SIZE, SHADOW_SIZE),
+    };
 
     LightPositions = new Float32Array(4 * MAX_FORWARD_LIGHTS);
     LightDetails = new Float32Array(4 * MAX_FORWARD_LIGHTS);
@@ -103,21 +100,6 @@ export class Game extends Game3D {
     Bob = 0;
     /** Set by the keyboard system when a movement key is down. */
     Walking = false;
-
-    constructor() {
-        super();
-
-        this.Targets = {
-            Scene: create_forward_target(this.Gl, RENDER_WIDTH, RENDER_HEIGHT, false),
-            Sun: create_depth_target(this.Gl, SHADOW_SIZE, SHADOW_SIZE),
-        };
-
-        // The whole chunky-upscale effect is this: sample the small target with
-        // nearest-neighbour filtering instead of the linear default.
-        this.Gl.bindTexture(GL_TEXTURE_2D, this.Targets.Scene.ColorTexture);
-        this.Gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        this.Gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    }
 
     override FrameUpdate(delta: number) {
         if (this.State === GameState.Playing) {

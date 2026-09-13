@@ -8,11 +8,11 @@
  * not cast shadows, and neither does the weapon in the player's hands.
  */
 
-import {TargetKind} from "../../lib/framebuffer.js";
 import {
     GL_FRAMEBUFFER,
     GL_TEXTURE1,
     GL_TEXTURE_2D,
+    GL_TRIANGLES,
     GL_UNSIGNED_SHORT,
 } from "../../lib/webgl.js";
 import {CLEAR_MASK} from "../components/com_camera.js";
@@ -24,10 +24,6 @@ const QUERY = Has.Transform | Has.Render;
 
 export function sys_render_depth(game: Game, delta: number) {
     let camera = game.World.Camera[game.Sun];
-    if (!camera || camera.Target.Kind !== TargetKind.Depth) {
-        return;
-    }
-
     let material = game.MaterialDepth;
 
     // Unbind the shadow map first. The forward pass leaves it bound as a
@@ -56,7 +52,7 @@ export function sys_render_depth(game: Game, delta: number) {
                 game.World.Transform[ent].World,
             );
             game.Gl.bindVertexArray(render.Mesh.Vao);
-            game.Gl.drawElements(material.Mode, render.Mesh.IndexCount, GL_UNSIGNED_SHORT, 0);
+            game.Gl.drawElements(GL_TRIANGLES, render.Mesh.IndexCount, GL_UNSIGNED_SHORT, 0);
         }
     }
 

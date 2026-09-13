@@ -9,7 +9,7 @@
  * never changes.
  */
 
-import {mat4_from_perspective, mat4_invert} from "../../lib/mat4.js";
+import {mat4_from_perspective} from "../../lib/mat4.js";
 import {ProjectionKind} from "../../lib/projection.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
@@ -40,7 +40,6 @@ export function sys_resize(game: Game, delta: number) {
                     projection.Near,
                     projection.Far,
                 );
-                mat4_invert(projection.Inverse, projection.Projection);
             }
         }
     }

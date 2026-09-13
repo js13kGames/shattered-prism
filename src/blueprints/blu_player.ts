@@ -29,7 +29,7 @@ export function blueprint_player(game: Game) {
     return [
         transform(),
         control_player(true, 0.15, 0),
-        move(9, 0),
+        move(9),
         collide(
             true,
             Layer.Player,
@@ -43,7 +43,7 @@ export function blueprint_player(game: Game) {
         children([
             transform([0, EYE_HEIGHT, 0]),
             control_player(false, 0, 0.15, -85, 85),
-            move(0, 0),
+            move(0),
             // A second channel. One source plays one clip at a time, so a kill
             // would be swallowed by the shot that caused it if they shared the
             // root's source.

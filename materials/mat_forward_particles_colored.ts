@@ -1,5 +1,4 @@
 import {link, Material} from "../lib/material.js";
-import {GL_POINTS} from "../lib/webgl.js";
 import {ParticlesColoredLayout} from "./layout.js";
 
 let vertex = `#version 300 es\n
@@ -44,7 +43,6 @@ export function mat_forward_particles_colored(
 ): Material<ParticlesColoredLayout> {
     let program = link(gl, vertex, fragment);
     return {
-        Mode: GL_POINTS,
         Program: program,
         Locations: {
             Pv: gl.getUniformLocation(program, "pv")!,

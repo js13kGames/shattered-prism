@@ -5,7 +5,7 @@
  * player so that its shadow map always covers the ground under them.
  */
 
-import {mat4_copy, mat4_get_forward, mat4_get_translation, mat4_multiply} from "../../lib/mat4.js";
+import {mat4_get_forward, mat4_get_translation, mat4_multiply} from "../../lib/mat4.js";
 import {Vec3} from "../../lib/math.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
@@ -36,7 +36,6 @@ export function sys_camera(game: Game, delta: number) {
             let camera = game.World.Camera[ent];
             let transform = game.World.Transform[ent];
 
-            mat4_copy(camera.World, transform.World);
             mat4_multiply(camera.Pv, camera.Projection.Projection, transform.Self);
             mat4_get_translation(camera.Position, transform.World);
         }

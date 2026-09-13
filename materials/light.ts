@@ -5,7 +5,6 @@ export const MAX_FORWARD_LIGHTS = 8;
 
 export const enum LightKind {
     Inactive,
-    Ambient,
     Directional,
     Point,
 }

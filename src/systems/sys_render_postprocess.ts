@@ -10,6 +10,7 @@ import {
     GL_FRAMEBUFFER,
     GL_TEXTURE0,
     GL_TEXTURE_2D,
+    GL_TRIANGLES,
     GL_UNSIGNED_SHORT,
 } from "../../lib/webgl.js";
 import {Game} from "../game.js";
@@ -30,7 +31,7 @@ export function sys_render_postprocess(game: Game, delta: number) {
     game.Gl.uniform1f(material.Locations.Time, (game.Now / 1000) % 100);
 
     game.Gl.bindVertexArray(game.MeshQuad.Vao);
-    game.Gl.drawElements(material.Mode, game.MeshQuad.IndexCount, GL_UNSIGNED_SHORT, 0);
+    game.Gl.drawElements(GL_TRIANGLES, game.MeshQuad.IndexCount, GL_UNSIGNED_SHORT, 0);
     game.Gl.bindVertexArray(null);
 
     game.Gl.enable(GL_DEPTH_TEST);

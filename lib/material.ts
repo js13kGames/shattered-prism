@@ -1,7 +1,6 @@
 import {GL_COMPILE_STATUS, GL_FRAGMENT_SHADER, GL_LINK_STATUS, GL_VERTEX_SHADER} from "./webgl.js";
 
 export interface Material<L> {
-    Mode: GLenum;
     Program: WebGLProgram;
     Locations: L;
 }

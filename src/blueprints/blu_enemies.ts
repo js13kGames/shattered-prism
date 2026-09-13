@@ -118,7 +118,7 @@ export function blueprint_enemy(
     return [
         transform(),
         control_ai(kind, route, neon),
-        move(stats.Speed, 0),
+        move(stats.Speed),
         collide(true, Layer.Enemy, Layer.Terrain, stats.Collider),
         rigid_body(RigidKind.Dynamic, 0),
         health(stats.Health),

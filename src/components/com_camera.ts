@@ -6,7 +6,7 @@
  * into the shadow map. In WebGL, like in OpenGL, cameras look down their own -Z.
  */
 
-import {DepthTarget, ForwardTarget} from "../../lib/framebuffer.js";
+import {RenderTarget} from "../../lib/framebuffer.js";
 import {mat4_create} from "../../lib/mat4.js";
 import {Mat4, Vec3, Vec4} from "../../lib/math.js";
 import {Projection} from "../../lib/projection.js";
@@ -24,9 +24,8 @@ export interface CameraEye {
 }
 
 export interface Camera extends CameraEye {
-    Target: ForwardTarget | DepthTarget;
+    Target: RenderTarget;
     Projection: Projection;
-    World: Mat4;
     ClearColor: Vec4;
 }
 
@@ -39,7 +38,7 @@ export interface Camera extends CameraEye {
  * @param fog_distance Distance at which the fog is fully opaque.
  */
 export function camera_target(
-    target: ForwardTarget | DepthTarget,
+    target: RenderTarget,
     projection: Projection,
     clear_color: Vec4 = [0, 0, 0, 1],
     fog_distance = 100,
@@ -49,7 +48,6 @@ export function camera_target(
         game.World.Camera[entity] = {
             Target: target,
             Projection: projection,
-            World: mat4_create(),
             Pv: mat4_create(),
             Position: [0, 0, 0],
             FogColor: clear_color,

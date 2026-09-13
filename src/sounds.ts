@@ -11,11 +11,10 @@
  * `[false, gain, attack, sustain, release]`.
  */
 
-import {AudioClipKind, AudioSynthClip} from "../lib/audio.js";
+import {AudioClip} from "../lib/audio.js";
 
 /** Firing a rebar: a saw crack over a noise thump. */
-export let snd_shoot: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_shoot: AudioClip = {
     Tracks: [
         {
             Instrument: [
@@ -39,8 +38,7 @@ export let snd_shoot: AudioSynthClip = {
 };
 
 /** A unicorn coming apart: a wide noise burst. */
-export let snd_explode: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_explode: AudioClip = {
     Tracks: [
         {
             Instrument: [7, "lowpass", 10, 2, , , , , [[false, 9, 0, 2, 5]]],
@@ -51,8 +49,7 @@ export let snd_explode: AudioSynthClip = {
 };
 
 /** Rebar biting concrete: a short, dry tick. */
-export let snd_hit: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_hit: AudioClip = {
     Tracks: [
         {
             Instrument: [4, "highpass", 9, 2, , , , , [[false, 6, 0, 0, 2]]],
@@ -63,8 +60,7 @@ export let snd_hit: AudioSynthClip = {
 };
 
 /** Taking a hit: a low, ugly square. */
-export let snd_hurt: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_hurt: AudioClip = {
     Tracks: [
         {
             Instrument: [
@@ -88,8 +84,7 @@ export let snd_hurt: AudioSynthClip = {
 };
 
 /** Air-dash: a filtered rush of air. */
-export let snd_dash: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_dash: AudioClip = {
     Tracks: [
         {
             Instrument: [5, "bandpass", 10, 5, , , , , [[false, 8, 1, 0, 3]]],
@@ -100,8 +95,7 @@ export let snd_dash: AudioSynthClip = {
 };
 
 /** Neon pixel collected: a bright ping. */
-export let snd_pickup: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_pickup: AudioClip = {
     Tracks: [
         {
             Instrument: [4, , , , , , , , [["sine", 7, 0, 1, 3, 9, , true, 0, 1, 3]]],
@@ -112,8 +106,7 @@ export let snd_pickup: AudioSynthClip = {
 };
 
 /** The shredder: a dry, fast tick. */
-export let snd_shred: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_shred: AudioClip = {
     Tracks: [
         {
             Instrument: [
@@ -137,8 +130,7 @@ export let snd_shred: AudioSynthClip = {
 };
 
 /** The mortar leaving the tube: a low, hollow thump. */
-export let snd_mortar: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_mortar: AudioClip = {
     Tracks: [
         {
             Instrument: [
@@ -162,8 +154,7 @@ export let snd_mortar: AudioSynthClip = {
 };
 
 /** The mortar landing. */
-export let snd_boom: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_boom: AudioClip = {
     Tracks: [
         {
             Instrument: [
@@ -187,8 +178,7 @@ export let snd_boom: AudioSynthClip = {
 };
 
 /** An empty chamber. */
-export let snd_dry: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_dry: AudioClip = {
     Tracks: [
         {
             Instrument: [3, "highpass", 11, 3, , , , , [[false, 5, 0, 0, 1]]],
@@ -199,8 +189,7 @@ export let snd_dry: AudioSynthClip = {
 };
 
 /** Changing weapon: a mechanical clack. */
-export let snd_switch: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_switch: AudioClip = {
     Tracks: [
         {
             Instrument: [
@@ -224,8 +213,7 @@ export let snd_switch: AudioSynthClip = {
 };
 
 /** A gunner's bolt. */
-export let snd_bolt: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_bolt: AudioClip = {
     Tracks: [
         {
             Instrument: [4, "bandpass", 10, 6, , , , , [["sawtooth", 6, 0, 1, 3, 10, , true, 1, 1, 3]]],
@@ -236,8 +224,7 @@ export let snd_bolt: AudioSynthClip = {
 };
 
 /** A jump pad throwing you into the air. */
-export let snd_pad: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_pad: AudioClip = {
     Tracks: [
         {
             Instrument: [5, "bandpass", 9, 5, , , , , [["sine", 8, 0, 1, 4, 6, , true, 1, 2, 4]]],
@@ -248,8 +235,7 @@ export let snd_pad: AudioSynthClip = {
 };
 
 /** The neigh: noise pushed through a filter that a saw LFO detunes. */
-export let snd_neigh: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_neigh: AudioClip = {
     Tracks: [
         {
             Instrument: [4, "lowpass", 9, 5, true, "sawtooth", 7, 9, [[false, 7, 1, 2, 5]]],
@@ -263,8 +249,7 @@ export let snd_neigh: AudioSynthClip = {
  * The arena drone. Two slow tracks, played on a loop as the player's idle clip:
  * a low pad that never resolves, and a sparse metallic knock above it.
  */
-export let snd_drone: AudioSynthClip = {
-    Kind: AudioClipKind.Synth,
+export let snd_drone: AudioClip = {
     BPM: 40,
     Tracks: [
         {

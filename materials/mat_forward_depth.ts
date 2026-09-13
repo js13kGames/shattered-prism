@@ -1,5 +1,4 @@
 import {link, Material} from "../lib/material.js";
-import {GL_TRIANGLES} from "../lib/webgl.js";
 import {Attribute, DepthLayout} from "./layout.js";
 
 /**
@@ -28,7 +27,6 @@ let fragment = `#version 300 es\n
 export function mat_forward_depth(gl: WebGL2RenderingContext): Material<DepthLayout> {
     let program = link(gl, vertex, fragment);
     return {
-        Mode: GL_TRIANGLES,
         Program: program,
         Locations: {
             Pv: gl.getUniformLocation(program, "pv")!,

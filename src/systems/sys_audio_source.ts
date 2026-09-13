@@ -4,11 +4,9 @@
  * Play audio clips from entities with [`AudioSource`](com_audio_source.html).
  */
 
-import {AudioClipKind, play_buffer_clip, play_synth_clip} from "../../lib/audio.js";
-import {mat4_get_forward, mat4_get_translation} from "../../lib/mat4.js";
-import {Vec3} from "../../lib/math.js";
+import {play_clip} from "../../lib/audio.js";
+import {mat4_get_translation} from "../../lib/mat4.js";
 import {Entity} from "../../lib/world.js";
-import {Transform} from "../components/com_transform.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
@@ -24,7 +22,6 @@ export function sys_audio_source(game: Game, delta: number) {
 
 function update(game: Game, entity: Entity, delta: number) {
     let audio_source = game.World.AudioSource[entity];
-    let transform = game.World.Transform[entity];
 
     if (audio_source.Current) {
         audio_source.Time += delta;
@@ -32,29 +29,22 @@ function update(game: Game, entity: Entity, delta: number) {
             // This clip can now be exited from. Note: We might clear Current
             // before the clip actually ends, if Exit < duration. That's OK, as
             // we don't attempt to stop the current audio anyways.
-            // TODO Schedule notes from Current progressively rather than all at once.
             audio_source.Current = undefined;
-        } else if (audio_source.Panner) {
-            update_panner(audio_source.Panner, transform);
         }
     }
 
     if (audio_source.Trigger && !audio_source.Current) {
-        switch (audio_source.Trigger.Kind) {
-            case AudioClipKind.Buffer:
-                play_buffer_clip(game.Audio, audio_source.Panner, audio_source.Trigger);
-                break;
-            case AudioClipKind.Synth:
-                play_synth_clip(game.Audio, audio_source.Panner, audio_source.Trigger);
-                break;
-        }
-
+        play_clip(game.Audio, audio_source.Panner, audio_source.Trigger);
         audio_source.Current = audio_source.Trigger;
         audio_source.Time = 0;
+    }
 
-        if (audio_source.Panner) {
-            update_panner(audio_source.Panner, transform);
-        }
+    if (audio_source.Panner) {
+        // Only the position matters. The panner's cone is a full circle by
+        // default, so its orientation changes nothing that you can hear.
+        audio_source.Panner.setPosition(
+            ...mat4_get_translation([0, 0, 0], game.World.Transform[entity].World),
+        );
     }
 
     // Audio triggers are only valid in the frame they're set; they don't stack
@@ -62,25 +52,4 @@ function update(game: Game, entity: Entity, delta: number) {
     // Reset the trigger to the default or undefined, regardless of whether it
     // triggered a new clip to play.
     audio_source.Trigger = audio_source.Idle;
-}
-
-const position: Vec3 = [0, 0, 0];
-const forward: Vec3 = [0, 0, 0];
-
-function update_panner(panner: PannerNode, transform: Transform) {
-    mat4_get_translation(position, transform.World);
-    mat4_get_forward(forward, transform.World);
-
-    if (panner.positionX) {
-        panner.positionX.value = position[0];
-        panner.positionY.value = position[1];
-        panner.positionZ.value = position[2];
-        panner.orientationX.value = forward[0];
-        panner.orientationY.value = forward[1];
-        panner.orientationZ.value = forward[2];
-    } else {
-        // Firefox & Safari.
-        panner.setPosition(...position);
-        panner.setOrientation(...forward);
-    }
 }

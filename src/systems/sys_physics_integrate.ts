@@ -1,16 +1,15 @@
 /**
  * # sys_physics_integrate
  *
- * The first step of the physics simulation: integrate the [rigid
- * body](com_rigid_body.html)'s acceleration and velocity into the entity's
- * transform.
+ * The first step of the physics simulation: integrate gravity and the [rigid
+ * body](com_rigid_body.html)'s velocity into the entity's transform.
  *
  * The order the rest of the simulation needs is
  * integrate -> transform -> collide -> resolve -> transform.
  */
 
 import {Vec3} from "../../lib/math.js";
-import {vec3_add, vec3_scale, vec3_set} from "../../lib/vec3.js";
+import {vec3_add, vec3_scale} from "../../lib/vec3.js";
 import {Entity} from "../../lib/world.js";
 import {RigidKind} from "../components/com_rigid_body.js";
 import {Game} from "../game.js";
@@ -40,9 +39,6 @@ function update(game: Game, entity: Entity, delta: number) {
 
     rigid_body.VelocityLinear[1] += GRAVITY * rigid_body.Gravity * delta;
 
-    vec3_scale(rigid_body.Acceleration, rigid_body.Acceleration, delta);
-    vec3_add(rigid_body.VelocityLinear, rigid_body.VelocityLinear, rigid_body.Acceleration);
-
     // Ground friction. Without it nothing that gets a push ever stops, because
     // walking is positional and never touches the velocity.
     if (rigid_body.IsGrounded && rigid_body.Friction > 0) {
@@ -54,6 +50,4 @@ function update(game: Game, entity: Entity, delta: number) {
     vec3_scale(velocity_delta, rigid_body.VelocityLinear, delta);
     vec3_add(transform.Translation, transform.Translation, velocity_delta);
     game.World.Signature[entity] |= Has.Dirty;
-
-    vec3_set(rigid_body.Acceleration, 0, 0, 0);
 }

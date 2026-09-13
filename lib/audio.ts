@@ -1,20 +1,4 @@
-import {element} from "./random.js";
-
-export type AudioClip = AudioBufferClip | AudioSynthClip;
-
-export const enum AudioClipKind {
-    Buffer,
-    Synth,
-}
-
-export interface AudioBufferClip {
-    Kind: AudioClipKind.Buffer;
-    Buffer: AudioBuffer;
-    Exit: number;
-}
-
-export interface AudioSynthClip {
-    Kind: AudioClipKind.Synth;
+export interface AudioClip {
     /** Audio tracks making up this clip. */
     Tracks: Array<AudioTrack>;
     /** How soon after starting this clip can we play another one (in seconds)? */
@@ -38,7 +22,15 @@ export interface Instrument {
     [InstrumentParam.LFOType]?: false | OscillatorType;
     [InstrumentParam.LFOAmount]?: number;
     [InstrumentParam.LFOFreq]?: number;
-    [InstrumentParam.Sources]: Array<Oscillator | Buffer>;
+    [InstrumentParam.Sources]: Array<Oscillator | Noise>;
+}
+
+interface Noise {
+    [SourceParam.SourceType]: false;
+    [SourceParam.GainAmount]: number;
+    [SourceParam.GainAttack]: number;
+    [SourceParam.GainSustain]: number;
+    [SourceParam.GainRelease]: number;
 }
 
 interface Oscillator {
@@ -55,13 +47,6 @@ interface Oscillator {
     [SourceParam.FreqRelease]?: number;
 }
 
-interface Buffer {
-    [SourceParam.SourceType]: false;
-    [SourceParam.GainAmount]: number;
-    [SourceParam.GainAttack]: number;
-    [SourceParam.GainSustain]: number;
-    [SourceParam.GainRelease]: number;
-}
 
 export const enum InstrumentParam {
     MasterGainAmount,
@@ -226,10 +211,10 @@ function lazy_noise_buffer(audio: AudioContext) {
     return noise_buffer;
 }
 
-export function play_synth_clip(
+export function play_clip(
     audio: AudioContext,
     panner: PannerNode | undefined,
-    clip: AudioSynthClip,
+    clip: AudioClip,
 ) {
     // Seconds per beat, corresponding to a quarter note.
     let spb = 60 / (clip.BPM || 120);
@@ -243,35 +228,4 @@ export function play_synth_clip(
             }
         }
     }
-}
-
-export function play_synth_random(
-    audio: AudioContext,
-    panner: PannerNode | undefined,
-    clip: AudioSynthClip,
-) {
-    for (let track of clip.Tracks) {
-        let note = element(track.Notes);
-        if (note) {
-            play_note(audio, panner, track.Instrument, note, 0);
-        }
-    }
-}
-
-export function play_buffer_clip(
-    audio: AudioContext,
-    panner: PannerNode | undefined,
-    clip: AudioBufferClip,
-) {
-    let source = audio.createBufferSource();
-    source.buffer = clip.Buffer;
-
-    if (panner) {
-        source.connect(panner);
-        panner.connect(audio.destination);
-    } else {
-        source.connect(audio.destination);
-    }
-
-    source.start();
 }

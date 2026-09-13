@@ -1,5 +1,4 @@
 import {link, Material} from "../lib/material.js";
-import {GL_TRIANGLES} from "../lib/webgl.js";
 import {Attribute, PostprocessLayout} from "./layout.js";
 
 /**
@@ -63,7 +62,6 @@ let fragment = `#version 300 es\n
 export function mat_postprocess_prism(gl: WebGL2RenderingContext): Material<PostprocessLayout> {
     let program = link(gl, vertex, fragment);
     return {
-        Mode: GL_TRIANGLES,
         Program: program,
         Locations: {
             Sampler: gl.getUniformLocation(program, "sampler")!,

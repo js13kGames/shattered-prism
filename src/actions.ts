@@ -1,9 +1,8 @@
 /**
  * # Actions
  *
- * Cross-cutting game events. `dispatch` is what the UI buttons call through
- * `window.$`; the exported functions below it are what systems call, because a
- * typed free function is smaller and safer than a switch over `unknown`.
+ * Cross-cutting game events. `start` is what the UI button calls through
+ * `window.$`; the other functions are what systems call.
  */
 
 import {AudioClip} from "../lib/audio.js";
@@ -25,22 +24,14 @@ import {snd_boom, snd_explode, snd_hit, snd_hurt, snd_pickup, snd_switch} from "
 import {WEAPONS} from "./weapons.js";
 import {Has} from "./world.js";
 
-export const enum Action {
-    Start,
-}
-
-export function dispatch(game: Game, action: Action, payload: unknown) {
-    switch (action) {
-        case Action.Start: {
-            // The AudioContext only starts from a user gesture, and this action
-            // only ever runs from a click on the title screen.
-            game.Audio.resume();
-            scene_level(game);
-            switch_weapon(game, 0, true);
-            game.State = GameState.Playing;
-            break;
-        }
-    }
+/** Start a new run. */
+export function start(game: Game) {
+    // The AudioContext only starts from a user gesture, and this only ever
+    // runs from a click on the title screen.
+    game.Audio.resume();
+    scene_level(game);
+    switch_weapon(game, 0, true);
+    game.State = GameState.Playing;
 }
 
 /**

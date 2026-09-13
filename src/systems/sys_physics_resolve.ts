@@ -53,7 +53,7 @@ let response: Vec3 = [0, 0, 0];
 function update(game: Game, entity: Entity) {
     let transform = game.World.Transform[entity];
     let rigid_body = game.World.RigidBody[entity];
-    let collide = game.World.Collide[rigid_body.ColliderId];
+    let collide = game.World.Collide[entity];
 
     if (rigid_body.Kind === RigidKind.Dynamic) {
         rigid_body.IsGrounded = false;

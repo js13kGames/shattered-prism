@@ -7,7 +7,6 @@
  * then the viewmodel over a cleared depth buffer.
  */
 
-import {TargetKind} from "../../lib/framebuffer.js";
 import {Material} from "../../lib/material.js";
 import {
     GL_ARRAY_BUFFER,
@@ -15,8 +14,10 @@ import {
     GL_DEPTH_BUFFER_BIT,
     GL_FLOAT,
     GL_FRAMEBUFFER,
+    GL_POINTS,
     GL_TEXTURE1,
     GL_TEXTURE_2D,
+    GL_TRIANGLES,
     GL_UNSIGNED_SHORT,
 } from "../../lib/webgl.js";
 import {Entity} from "../../lib/world.js";
@@ -29,10 +30,6 @@ const QUERY = Has.Transform | Has.Render;
 
 export function sys_render_forward(game: Game, delta: number) {
     let camera = game.World.Camera[game.PlayerCamera];
-    if (!camera || camera.Target.Kind !== TargetKind.Forward) {
-        return;
-    }
-
     game.Gl.bindFramebuffer(GL_FRAMEBUFFER, camera.Target.Framebuffer);
     game.Gl.viewport(0, 0, camera.Target.Width, camera.Target.Height);
     game.Gl.clearColor(...camera.ClearColor);
@@ -97,10 +94,7 @@ function use_material(game: Game, render: Render, eye: CameraEye) {
 
         // Unit 1: the postprocess pass owns unit 0.
         game.Gl.activeTexture(GL_TEXTURE1);
-        game.Gl.bindTexture(
-            GL_TEXTURE_2D,
-            sun.Target.Kind === TargetKind.Depth ? sun.Target.DepthTexture : null,
-        );
+        game.Gl.bindTexture(GL_TEXTURE_2D, sun.Target.DepthTexture);
         game.Gl.uniform1i(render.Material.Locations.ShadowMap, 1);
     }
 }
@@ -115,7 +109,7 @@ function draw_entity(game: Game, entity: Entity) {
         game.Gl.uniform4fv(render.Material.Locations.DiffuseColor, render.DiffuseColor);
         game.Gl.uniform4fv(render.Material.Locations.EmissiveColor, render.EmissiveColor);
         game.Gl.bindVertexArray(render.Mesh.Vao);
-        game.Gl.drawElements(render.Material.Mode, render.Mesh.IndexCount, GL_UNSIGNED_SHORT, 0);
+        game.Gl.drawElements(GL_TRIANGLES, render.Mesh.IndexCount, GL_UNSIGNED_SHORT, 0);
         return;
     }
 
@@ -152,5 +146,5 @@ function draw_entity(game: Game, entity: Entity) {
         FLOATS_PER_PARTICLE * 4,
         4 * 4,
     );
-    game.Gl.drawArrays(render.Material.Mode, 0, emitter.Instances.length / FLOATS_PER_PARTICLE);
+    game.Gl.drawArrays(GL_POINTS, 0, emitter.Instances.length / FLOATS_PER_PARTICLE);
 }

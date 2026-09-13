@@ -21,12 +21,9 @@ export const enum RigidKind {
 
 export interface RigidBody {
     Kind: RigidKind;
-    ColliderId: Entity;
     Bounciness: number;
-    Acceleration: Vec3;
     VelocityLinear: Vec3;
     VelocityResolved: Vec3;
-    LastPosition: Vec3;
     IsGrounded: boolean;
     /** How fast horizontal velocity bleeds off while grounded. */
     Friction: number;
@@ -46,12 +43,9 @@ export function rigid_body(kind: RigidKind, bounciness = 0.5, friction = 9, grav
         game.World.Signature[entity] |= Has.RigidBody;
         game.World.RigidBody[entity] = {
             Kind: kind,
-            ColliderId: entity,
             Bounciness: bounciness,
-            Acceleration: [0, 0, 0],
             VelocityLinear: [0, 0, 0],
             VelocityResolved: [0, 0, 0],
-            LastPosition: [0, 0, 0],
             IsGrounded: false,
             Friction: friction,
             Gravity: gravity,

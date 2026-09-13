@@ -10,7 +10,6 @@
  */
 
 import {instantiate} from "../lib/game.js";
-import {mat4_from_ortho, mat4_invert} from "../lib/mat4.js";
 import {Vec3, Vec4} from "../lib/math.js";
 import {orthographic} from "../lib/projection.js";
 import {blueprint_enemy, NEON, STATS} from "./blueprints/blu_enemies.js";
@@ -20,11 +19,12 @@ import {camera_target} from "./components/com_camera.js";
 import {collide} from "./components/com_collide.js";
 import {health, pickup, platform, shatter, trigger, TriggerKind} from "./components/com_gameplay.js";
 import {lifespan} from "./components/com_lifespan.js";
-import {light_directional, light_point} from "./components/com_light.js";
+import {light} from "./components/com_light.js";
 import {render_prism} from "./components/com_render.js";
 import {RigidKind, rigid_body} from "./components/com_rigid_body.js";
 import {set_position, set_rotation, set_scale, transform} from "./components/com_transform.js";
 import {Game, Layer} from "./game.js";
+import {LightKind} from "../materials/light.js";
 import {
     AMMO,
     build_grid,
@@ -94,8 +94,8 @@ export function scene_level(game: Game) {
     game.Sun = instantiate(game, [
         transform(),
         set_rotation(-52, 28, 0),
-        light_directional([1, 0.96, 0.86], 0.95),
-        camera_target(game.Targets.Sun, sun_projection()),
+        light(LightKind.Directional, [1, 0.96, 0.86], 0.95),
+        camera_target(game.Targets.Sun, orthographic(54, 1, 190)),
     ]);
 
     // The drone, on an entity of its own: an idle clip on the player would
@@ -112,13 +112,6 @@ export function scene_level(game: Game) {
     game.PlayerEye = game.World.Children[player].Children[0];
     game.PlayerCamera = game.World.Children[game.PlayerEye].Children[0];
     game.Viewmodel = game.World.Children[game.PlayerCamera].Children[0];
-}
-
-function sun_projection() {
-    let projection = orthographic([54, 54], 1, 190);
-    mat4_from_ortho(projection.Projection, 54, 54, -54, -54, 1, 190);
-    mat4_invert(projection.Inverse, projection.Projection);
-    return projection;
 }
 
 /** World Y of the walkable surface of a cell. */
@@ -240,7 +233,7 @@ function build_features(game: Game, grid: Grid) {
         instantiate(game, [
             transform(),
             set_position(cell_x(x), y, cell_z(z)),
-            light_point([r, g, b], intensity),
+            light(LightKind.Point, [r, g, b], intensity),
         ]);
     }
 
@@ -299,7 +292,7 @@ function build_features(game: Game, grid: Grid) {
         instantiate(game, [
             transform(),
             set_position(cell_x(x), y + 1.4, cell_z(z)),
-            light_point([0.3, 0.7, 1], 1.4),
+            light(LightKind.Point, [0.3, 0.7, 1], 1.4),
         ]);
     }
 
@@ -330,7 +323,7 @@ function build_features(game: Game, grid: Grid) {
     instantiate(game, [
         transform(),
         set_position(cell_x(EXIT[0]), exit_y + 2, cell_z(EXIT[1])),
-        light_point([0.4, 1, 0.6], 3.4),
+        light(LightKind.Point, [0.4, 1, 0.6], 3.4),
     ]);
 }
 

@@ -1,5 +1,3 @@
-import {html} from "../../lib/html.js";
-import {Action} from "../actions.js";
 import {Game, GameState} from "../game.js";
 import {WEAPONS} from "../weapons.js";
 import {Has} from "../world.js";
@@ -59,7 +57,7 @@ function Screen(game: Game) {
         button = "Again";
     }
 
-    return html`
+    return `
         <div style="${PANEL}">
             <div style="font-size: 6.5vmin; color: ${colour}; letter-spacing: .5em">${title}</div>
             <div>${line}</div>
@@ -68,7 +66,7 @@ function Screen(game: Game) {
                 space jump, again in the air to dash &middot; shift slide<br />
                 they only come for you once they see you &middot; find the green door
             </div>
-            <button style="${BUTTON}" onclick="$(${Action.Start})">${button}</button>
+            <button style="${BUTTON}" onclick="$()">${button}</button>
         </div>
     `;
 }
@@ -84,7 +82,7 @@ function Hud(game: Game) {
     let weapon = WEAPONS[game.Weapon];
     let ammo = weapon.MaxAmmo ? `${game.Ammo[game.Weapon]}` : "&infin;";
 
-    return html`
+    return `
         <div
             style="
                 position: absolute;

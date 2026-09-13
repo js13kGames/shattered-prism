@@ -11,10 +11,9 @@
 import {mat4_create} from "../../lib/mat4.js";
 import {Mat4, Quat, Vec3} from "../../lib/math.js";
 import {quat_copy, quat_from_euler} from "../../lib/quat.js";
-import {vec3_copy} from "../../lib/vec3.js";
 import {Entity} from "../../lib/world.js";
 import {Game} from "../game.js";
-import {Has, World} from "../world.js";
+import {Has} from "../world.js";
 
 export interface Transform {
     /** Absolute matrix relative to the world. */
@@ -28,8 +27,6 @@ export interface Transform {
     /** Local scale relative to the parent. */
     Scale: Vec3;
     Parent?: Entity;
-    /** Ignore parent's rotation and scale? */
-    IsGyroscope: boolean;
 }
 
 /**
@@ -38,13 +35,11 @@ export interface Transform {
  * @param translation Local translation relative to the parent.
  * @param rotation Local rotation relative to the parent.
  * @param scale Local scale relative to the parent.
- * @param is_gyroscope Ignore parent's rotation and scale?
  */
 export function transform(
     translation: Vec3 = [0, 0, 0],
     rotation: Quat = [0, 0, 0, 1],
     scale: Vec3 = [1, 1, 1],
-    is_gyroscope: boolean = false,
 ) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.Transform | Has.Dirty;
@@ -54,7 +49,6 @@ export function transform(
             Translation: translation,
             Rotation: rotation,
             Scale: scale,
-            IsGyroscope: is_gyroscope,
         };
     };
 }
@@ -75,21 +69,6 @@ export function set_position(x: number, y: number, z: number) {
         local.Translation[0] = x;
         local.Translation[1] = y;
         local.Translation[2] = z;
-    };
-}
-
-/**
- * Copy a position into the entity's transform.
- *
- * This mixin must be used after `transform()` in order to ensure that
- * the entity already has the `Transform` component.
- *
- * @param translation Local translation relative to the parent.
- */
-export function copy_position(translation: Vec3) {
-    return (game: Game, entity: Entity) => {
-        let local = game.World.Transform[entity];
-        vec3_copy(local.Translation, translation);
     };
 }
 
@@ -142,37 +121,4 @@ export function set_scale(x: number, y: number, z: number) {
         local.Scale[1] = y;
         local.Scale[2] = z;
     };
-}
-
-/**
- * Copy a scale vector into the entity's transform.
- *
- * This mixin must be used after `transform()` in order to ensure that
- * the entity already has the `Transform` component.
- *
- * @param scale Local scale relative to the parent.
- */
-export function copy_scale(scale: Vec3) {
-    return (game: Game, entity: Entity) => {
-        let local = game.World.Transform[entity];
-        vec3_copy(local.Scale, scale);
-    };
-}
-
-/**
- * Yield ascendants matching a component mask. Start at the current entity.
- *
- * @param world World object which stores the component data.
- * @param entity The first entity to test.
- * @param mask Component mask to look for.
- */
-export function* query_up(world: World, entity: Entity, mask: Has): IterableIterator<Entity> {
-    if ((world.Signature[entity] & mask) === mask) {
-        yield entity;
-    }
-
-    let parent = world.Transform[entity].Parent;
-    if (parent !== undefined) {
-        yield* query_up(world, parent, mask);
-    }
 }
