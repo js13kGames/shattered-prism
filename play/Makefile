@@ -21,8 +21,8 @@ game.esbuild.js: $(SOURCES)
 		--analyze \
 	> $@
 
-game.sed.js: game.esbuild.js sed.txt
-	sed  -f sed.txt  $< > $@
+game.sed.js: game.esbuild.js sed.txt glsl.cjs
+	sed  -f sed.txt  $< | node glsl.cjs > $@
 
 game.terser.js: game.sed.js terser_compress.txt | node_modules
 	npx --quiet terser $< \
