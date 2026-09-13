@@ -37,6 +37,10 @@ Then open <http://localhost:1234/src/>.
     make -C play index.zip    # play/index.zip
     RELEASE=1 make -C play index.zip   # slower, smaller
 
+The build also makes the shaders smaller. `play/glsl.cjs` removes the white
+space from each shader and gives each shader variable a short name. The source
+shaders stay easy to read.
+
 The zip target needs `7zz` and `advzip`. On macOS with MacPorts, install them
 with `sudo port install 7zip advancecomp`. With Homebrew, use `brew install
 sevenzip advancecomp`.
@@ -100,8 +104,12 @@ camera.
 
 Every commit message ends with the size of `play/index.zip` in bytes.
 
-The original target was 13312 bytes. The first version of the game, an arena
-survival mode, came in at 11701. The rebuild into a labyrinth with shadows,
-three weapons, visible viewmodels and stateful AI is larger. The size is still
-measured and reported on every commit, and the discipline that keeps it small —
-no assets, one material, generated geometry — is unchanged.
+The target is 13,312 bytes. The labyrinth version started at 15,528 bytes. The
+removal of unused code and the shader build step brought it to approximately
+13,650 bytes, and to 13,606 bytes with `RELEASE=1`.
+
+The packer is not deterministic. The same code can give a zip that is 30 bytes
+larger or smaller. Compare sizes over more than one build.
+
+Shorter code does not always give a smaller zip. The packer already compresses
+repeated code very well. To make the zip smaller, remove code that is unique.

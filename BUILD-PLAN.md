@@ -111,7 +111,7 @@ make -C play clean
 RELEASE=1 make -C play index.zip   # slower, smaller: roadroller -O2, advzip iter 10000
 ```
 
-Pipeline stages (see `play/Makefile`): `tsc --noEmit` (type check) → `esbuild` bundle with `DEBUG=false` → `sed` cleanup → `terser` (mangle toplevel + capital props) → `roadroller` (JS packer) → `posthtml` inlines JS and CSS into one `index.html`. The zip target needs `7zz` and `advzip` (`sudo port install 7zip advancecomp` on macOS).
+Pipeline stages (see `play/Makefile`): `tsc --noEmit` (type check) → `esbuild` bundle with `DEBUG=false` → `sed` cleanup → `glsl.cjs` (shader white space and short shader names) → `terser` (mangle toplevel + capital props) → `roadroller` (JS packer) → `posthtml` inlines JS and CSS into one `index.html`. The zip target needs `7zz` and `advzip` (`sudo port install 7zip advancecomp` on macOS).
 
 ### 4.1 Bundle size in every commit message
 

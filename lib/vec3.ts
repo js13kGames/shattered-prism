@@ -121,20 +121,6 @@ export function vec3_distance_squared(a: Vec3, b: Vec3) {
     return x * x + y * y + z * z;
 }
 
-export function vec3_manhattan(a: Vec3, b: Vec3) {
-    return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
-}
-
-export function vec3_lerp(out: Vec3, a: Vec3, b: Vec3, t: number) {
-    let ax = a[0];
-    let ay = a[1];
-    let az = a[2];
-    out[0] = ax + t * (b[0] - ax);
-    out[1] = ay + t * (b[1] - ay);
-    out[2] = az + t * (b[2] - az);
-    return out;
-}
-
 /**
  * Extend one vector with the values of another.
  *
