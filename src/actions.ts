@@ -78,7 +78,7 @@ export function switch_weapon(game: Game, slot: number, force = false) {
         holder.Children.length = 0;
     }
 
-    children(blueprint_viewmodel(game, slot))(game, game.Viewmodel);
+    children(blueprint_viewmodel(slot))(game, game.Viewmodel);
     // Raise the new gun into frame rather than snapping it there.
     game.Recoil = 1;
     play(game, game.PlayerEntity, snd_switch);
@@ -157,7 +157,7 @@ export function splash(
     neon: [number, number, number],
 ) {
     instantiate(game, [
-        ...blueprint_burst(game, neon, 70, radius * 1.6, 8),
+        ...blueprint_burst(neon, 70, radius * 1.6, 8),
         set_position(centre[0], centre[1], centre[2]),
     ]);
     play(game, game.PlayerEye, snd_boom);
@@ -198,7 +198,7 @@ function kill_enemy(game: Game, entity: Entity) {
     mat4_get_translation(point, game.World.Transform[entity].World);
 
     instantiate(game, [
-        ...blueprint_burst(game, ai.Neon, 90, 11, 7),
+        ...blueprint_burst(ai.Neon, 90, 11, 7),
         set_position(point[0], point[1], point[2]),
     ]);
 
@@ -206,7 +206,7 @@ function kill_enemy(game: Game, entity: Entity) {
     if (vec3_distance(point, other_point) < CLOSE_RANGE) {
         for (let i = 0; i < 4; i++) {
             let drop = instantiate(game, [
-                ...blueprint_drop(game, ai.Neon),
+                ...blueprint_drop(ai.Neon),
                 set_position(point[0], point[1] + 0.5, point[2]),
             ]);
             let body = game.World.RigidBody[drop];
@@ -237,7 +237,7 @@ function shatter_crate(game: Game, entity: Entity) {
 
     for (let i = 0; i < integer(4, 5); i++) {
         let chunk = instantiate(game, [
-            ...blueprint_crate(game, generation),
+            ...blueprint_crate(generation),
             set_position(
                 point[0] + float(-spread[0], spread[0]),
                 point[1] + float(-spread[1], spread[1]),

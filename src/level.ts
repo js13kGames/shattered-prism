@@ -178,7 +178,7 @@ function box(
     let [x, z, w, d] = rect;
     return instantiate(game, [
         transform(),
-        render_prism(game.MeshCube, color),
+        render_prism(color),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         set_position(
@@ -228,7 +228,7 @@ function build_features(game: Game, grid: Grid) {
             transform(),
             set_position(cell_x(x), y + 0.35, cell_z(z)),
             set_scale(0.9, 0.25, 0.9),
-            render_prism(game.MeshCube, [0.1, 0.1, 0.1, 1], [r, g, b, 1.7]),
+            render_prism([0.1, 0.1, 0.1, 1], [r, g, b, 1.7]),
         ]);
         instantiate(game, [
             transform(),
@@ -240,7 +240,7 @@ function build_features(game: Game, grid: Grid) {
     for (let [x, z] of PILLARS) {
         instantiate(game, [
             transform(),
-            render_prism(game.MeshCylinder, CONCRETE_DARK),
+            render_prism(CONCRETE_DARK, NONE, true),
             collide(false, Layer.Terrain, Layer.None),
             rigid_body(RigidKind.Static),
             set_position(cell_x(x), floor_top(grid, x, z) + 3.5, cell_z(z)),
@@ -250,7 +250,7 @@ function build_features(game: Game, grid: Grid) {
 
     for (let [x, z] of CRATES) {
         instantiate(game, [
-            ...blueprint_crate(game, 0),
+            ...blueprint_crate(0),
             set_position(cell_x(x), floor_top(grid, x, z) + 0.9, cell_z(z)),
             set_scale(1.8, 1.8, 1.8),
         ]);
@@ -262,7 +262,7 @@ function build_features(game: Game, grid: Grid) {
             transform(),
             set_position(cell_x(x), floor_top(grid, x, z) + 0.5, cell_z(z)),
             set_scale(0.9, 0.6, 0.9),
-            render_prism(game.MeshCube, [0.12, 0.12, 0.12, 1], [...neon, 2.4]),
+            render_prism([0.12, 0.12, 0.12, 1], [...neon, 2.4]),
             collide(false, Layer.Pickup, Layer.None, [1.4, 2, 1.4]),
             pickup(0, WEAPONS[weapon].Box, weapon),
         ]);
@@ -273,7 +273,7 @@ function build_features(game: Game, grid: Grid) {
             transform(),
             set_position(cell_x(x), floor_top(grid, x, z) + 0.45, cell_z(z)),
             set_scale(0.8, 0.55, 0.8),
-            render_prism(game.MeshCube, [0.12, 0.12, 0.12, 1], [0.4, 1, 0.75, 2.4]),
+            render_prism([0.12, 0.12, 0.12, 1], [0.4, 1, 0.75, 2.4]),
             collide(false, Layer.Pickup, Layer.None, [1.4, 2, 1.4]),
             pickup(28),
         ]);
@@ -285,7 +285,7 @@ function build_features(game: Game, grid: Grid) {
             transform(),
             set_position(cell_x(x), y + 0.12, cell_z(z)),
             set_scale(CELL * 0.8, 0.24, CELL * 0.8),
-            render_prism(game.MeshCube, [0.1, 0.1, 0.12, 1], [0.3, 0.7, 1, 2.4]),
+            render_prism([0.1, 0.1, 0.12, 1], [0.3, 0.7, 1, 2.4]),
             collide(false, Layer.Trigger, Layer.None, [1, 2.5, 1]),
             trigger(TriggerKind.Pad, [px, up, pz]),
         ]);
@@ -301,7 +301,7 @@ function build_features(game: Game, grid: Grid) {
             transform(),
             set_position(cell_x(x), level_y(low) - 0.3, cell_z(z)),
             set_scale(CELL * 0.95, 0.6, CELL * 0.95),
-            render_prism(game.MeshCube, CONCRETE, [0.5, 0.8, 1, 0.5]),
+            render_prism(CONCRETE, [0.5, 0.8, 1, 0.5]),
             // The collider is flagged dynamic so that its box is recomputed as
             // it moves; the body is kinematic so that nothing pushes it back.
             collide(true, Layer.Terrain, Layer.None),
@@ -316,7 +316,7 @@ function build_features(game: Game, grid: Grid) {
         transform(),
         set_position(cell_x(EXIT[0]), exit_y + 1.8, cell_z(EXIT[1])),
         set_scale(3.2, 3.6, 0.5),
-        render_prism(game.MeshCube, [0.1, 0.1, 0.1, 1], [0.4, 1, 0.6, 2.2]),
+        render_prism([0.1, 0.1, 0.1, 1], [0.4, 1, 0.6, 2.2]),
         collide(false, Layer.Trigger, Layer.None, [1, 1, 3]),
         trigger(TriggerKind.Exit),
     ]);
@@ -338,7 +338,7 @@ function spawn_enemies(game: Game, grid: Grid) {
         ]);
 
         instantiate(game, [
-            ...blueprint_enemy(game, spawn.Kind, route, NEON[i % NEON.length]),
+            ...blueprint_enemy(spawn.Kind, route, NEON[i % NEON.length]),
             set_position(route[0][0], route[0][1], route[0][2]),
         ]);
         game.Enemies++;
@@ -349,10 +349,10 @@ function spawn_enemies(game: Game, grid: Grid) {
  * A crate: cover you can shoot away. Generation 1 is still cover, generation 2
  * is rubble that lands, lies there, and is gone.
  */
-export function blueprint_crate(game: Game, generation: number) {
+export function blueprint_crate(generation: number) {
     let common = [
         transform(),
-        render_prism(game.MeshCube, generation ? CONCRETE_ROOF : CONCRETE_DARK, NONE),
+        render_prism(generation ? CONCRETE_ROOF : CONCRETE_DARK, NONE),
         // The mask has to name Terrain, not None: a collider with an empty mask
         // is only ever found by colliders that name *it*, and nothing names a
         // chunk, so it would fall through the floor.

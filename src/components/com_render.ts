@@ -43,18 +43,18 @@ export interface RenderPrism {
 }
 
 /**
- * Draw a mesh with the prism material.
+ * Draw a cube or a cylinder with the prism material.
  *
- * @param mesh The mesh to draw.
  * @param diffuse The lit colour of the surface.
  * @param emissive The unlit colour added on top; the alpha is the amount. Over
  * 1.0 the colour saturates, which is what makes the bloom pass pick it up.
+ * @param cylinder Draw the eight-sided prism instead of the cube.
  * @param phase Opaque unless this is part of the weapon in the player's hands.
  */
 export function render_prism(
-    mesh: Mesh,
     diffuse: Vec4,
     emissive: Vec4 = [0, 0, 0, 0],
+    cylinder = false,
     phase = RenderPhase.Opaque,
 ) {
     return (game: Game, entity: Entity) => {
@@ -62,7 +62,7 @@ export function render_prism(
         game.World.Render[entity] = {
             Kind: RenderKind.Prism,
             Material: game.MaterialPrism,
-            Mesh: mesh,
+            Mesh: cylinder ? game.MeshCylinder : game.MeshCube,
             Phase: diffuse[3] < 1 && phase === RenderPhase.Opaque ? RenderPhase.Transparent : phase,
             DiffuseColor: diffuse,
             EmissiveColor: emissive,

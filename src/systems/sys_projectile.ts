@@ -50,7 +50,7 @@ function update(game: Game, entity: Entity) {
         }
 
         instantiate(game, [
-            ...blueprint_burst(game, projectile.Neon, 12, 6, 3),
+            ...blueprint_burst(projectile.Neon, 12, 6, 3),
             set_position(point[0], point[1], point[2]),
         ]);
 

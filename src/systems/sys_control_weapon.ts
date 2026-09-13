@@ -89,7 +89,7 @@ function update(game: Game, entity: Entity, delta: number) {
         quat_align_y(rotation, spread);
 
         let shot = instantiate(game, [
-            ...blueprint_shot(game, weapon, entity),
+            ...blueprint_shot(weapon, entity),
             set_position(
                 origin[0] + aim[0] * MUZZLE_DISTANCE,
                 origin[1] + aim[1] * MUZZLE_DISTANCE,

@@ -19,7 +19,7 @@ import {move} from "../components/com_move.js";
 import {render_prism} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
-import {Game, Layer} from "../game.js";
+import {Layer} from "../game.js";
 import {EnemyKind} from "../map.js";
 
 /** Hyper-saturated, because nothing else in the megastructure has any colour. */
@@ -90,8 +90,11 @@ export const STATS: Array<EnemyStats> = [
     },
 ];
 
+/**
+ * One piece of a body. A rotation must be a unit quaternion: sys_transform
+ * inverts transforms by transposing the rotation, which is only exact for one.
+ */
 function part(
-    game: Game,
     position: Vec3,
     scale: Vec3,
     color: Vec4,
@@ -99,14 +102,10 @@ function part(
     cylinder = false,
     rotation?: [number, number, number, number],
 ) {
-    return [
-        transform(position, rotation, scale),
-        render_prism(cylinder ? game.MeshCylinder : game.MeshCube, color, emissive),
-    ];
+    return [transform(position, rotation, scale), render_prism(color, emissive, cylinder)];
 }
 
 export function blueprint_enemy(
-    game: Game,
     kind: EnemyKind,
     route: Array<Vec3>,
     neon: [number, number, number],
@@ -123,88 +122,82 @@ export function blueprint_enemy(
         rigid_body(RigidKind.Dynamic, 0),
         health(stats.Health),
         audio_source(true),
-        children(...body(game, kind, dim, glow)),
+        children(...body(kind, dim, glow)),
     ];
 }
 
-function body(game: Game, kind: EnemyKind, dim: Vec4, glow: Vec4) {
+function body(kind: EnemyKind, dim: Vec4, glow: Vec4) {
     if (kind === EnemyKind.Gunner) {
         return [
             // Torso, tapering into a chest plate.
-            part(game, [0, 0.25, 0], [0.9, 1.1, 0.7], HIDE),
-            part(game, [0, 0.5, 0.36], [0.7, 0.55, 0.12], PLATE, dim),
+            part([0, 0.25, 0], [0.9, 1.1, 0.7], HIDE),
+            part([0, 0.5, 0.36], [0.7, 0.55, 0.12], PLATE, dim),
             // Head with a low, wide visor.
-            part(game, [0, 1.1, 0.05], [0.5, 0.45, 0.5], HIDE),
-            part(game, [0, 1.12, 0.3], [0.4, 0.09, 0.06], HIDE, glow),
+            part([0, 1.1, 0.05], [0.5, 0.45, 0.5], HIDE),
+            part([0, 1.12, 0.3], [0.4, 0.09, 0.06], HIDE, glow),
             // Horn, swept back over the skull.
-            part(game, [0, 1.5, -0.1], [0.12, 0.85, 0.12], HIDE, glow, true, [0.2, 0, 0, 0.98]),
+            part([0, 1.5, -0.1], [0.12, 0.85, 0.12], HIDE, glow, true, [0.2, 0, 0, 0.9798]),
             // Left arm.
-            part(game, [-0.6, 0.35, 0], [0.22, 0.9, 0.22], HIDE, NONE, true),
+            part([-0.6, 0.35, 0], [0.22, 0.9, 0.22], HIDE, NONE, true),
             // Right arm is a cannon.
-            part(game, [0.62, 0.4, 0.1], [0.3, 0.7, 0.3], PLATE, NONE, true),
-            part(game, [0.62, 0.3, 0.62], [0.24, 0.75, 0.24], HIDE, NONE, true, [
-                0.7071, 0, 0, 0.7071,
-            ]),
-            part(game, [0.62, 0.3, 1], [0.16, 0.16, 0.1], HIDE, glow),
+            part([0.62, 0.4, 0.1], [0.3, 0.7, 0.3], PLATE, NONE, true),
+            part([0.62, 0.3, 0.62], [0.24, 0.75, 0.24], HIDE, NONE, true, [0.7071, 0, 0, 0.7071]),
+            part([0.62, 0.3, 1], [0.16, 0.16, 0.1], HIDE, glow),
             // Backpack vents.
-            part(game, [0, 0.55, -0.44], [0.55, 0.5, 0.2], PLATE, dim),
+            part([0, 0.55, -0.44], [0.55, 0.5, 0.2], PLATE, dim),
             // Legs.
-            part(game, [-0.26, -0.75, 0], [0.26, 1.2, 0.26], HIDE, NONE, true),
-            part(game, [0.26, -0.75, 0], [0.26, 1.2, 0.26], HIDE, NONE, true),
-            part(game, [-0.26, -1.45, 0.12], [0.3, 0.16, 0.5], PLATE),
-            part(game, [0.26, -1.45, 0.12], [0.3, 0.16, 0.5], PLATE),
+            part([-0.26, -0.75, 0], [0.26, 1.2, 0.26], HIDE, NONE, true),
+            part([0.26, -0.75, 0], [0.26, 1.2, 0.26], HIDE, NONE, true),
+            part([-0.26, -1.45, 0.12], [0.3, 0.16, 0.5], PLATE),
+            part([0.26, -1.45, 0.12], [0.3, 0.16, 0.5], PLATE),
         ];
     }
 
     if (kind === EnemyKind.Hound) {
         return [
             // Long low body in two segments.
-            part(game, [0, 0.1, -0.3], [0.62, 0.5, 0.9], HIDE),
-            part(game, [0, 0.14, 0.5], [0.55, 0.45, 0.7], HIDE),
+            part([0, 0.1, -0.3], [0.62, 0.5, 0.9], HIDE),
+            part([0, 0.14, 0.5], [0.55, 0.45, 0.7], HIDE),
             // Spine ridge.
-            part(game, [0, 0.42, 0], [0.1, 0.2, 1.5], PLATE, dim),
+            part([0, 0.42, 0], [0.1, 0.2, 1.5], PLATE, dim),
             // Long head.
-            part(game, [0, 0.16, 1.15], [0.36, 0.32, 0.6], HIDE),
-            part(game, [0, 0.16, 1.46], [0.3, 0.08, 0.06], HIDE, glow),
+            part([0, 0.16, 1.15], [0.36, 0.32, 0.6], HIDE),
+            part([0, 0.16, 1.46], [0.3, 0.08, 0.06], HIDE, glow),
             // Horn, low and forward: this one leads with its face.
-            part(game, [0, 0.44, 1.3], [0.1, 0.95, 0.1], HIDE, glow, true, [
-                -0.6, 0, 0, 0.8,
-            ]),
+            part([0, 0.44, 1.3], [0.1, 0.95, 0.1], HIDE, glow, true, [-0.6, 0, 0, 0.8]),
             // Four thin legs.
-            part(game, [-0.32, -0.42, 0.55], [0.14, 1, 0.14], HIDE, NONE, true),
-            part(game, [0.32, -0.42, 0.55], [0.14, 1, 0.14], HIDE, NONE, true),
-            part(game, [-0.32, -0.42, -0.5], [0.14, 1, 0.14], HIDE, NONE, true),
-            part(game, [0.32, -0.42, -0.5], [0.14, 1, 0.14], HIDE, NONE, true),
+            part([-0.32, -0.42, 0.55], [0.14, 1, 0.14], HIDE, NONE, true),
+            part([0.32, -0.42, 0.55], [0.14, 1, 0.14], HIDE, NONE, true),
+            part([-0.32, -0.42, -0.5], [0.14, 1, 0.14], HIDE, NONE, true),
+            part([0.32, -0.42, -0.5], [0.14, 1, 0.14], HIDE, NONE, true),
             // Tail spike.
-            part(game, [0, 0.28, -0.95], [0.1, 0.7, 0.1], HIDE, dim, true, [
-                0.55, 0, 0, 0.83,
-            ]),
+            part([0, 0.28, -0.95], [0.1, 0.7, 0.1], HIDE, dim, true, [0.5524, 0, 0, 0.8336]),
         ];
     }
 
     // Sentinel: the heavy one.
     return [
         // Barrel body with armour plates down the flanks.
-        part(game, [0, 0.2, 0], [1.15, 0.9, 1.8], HIDE),
-        part(game, [-0.62, 0.3, 0], [0.12, 0.6, 1.4], PLATE, dim),
-        part(game, [0.62, 0.3, 0], [0.12, 0.6, 1.4], PLATE, dim),
+        part([0, 0.2, 0], [1.15, 0.9, 1.8], HIDE),
+        part([-0.62, 0.3, 0], [0.12, 0.6, 1.4], PLATE, dim),
+        part([0.62, 0.3, 0], [0.12, 0.6, 1.4], PLATE, dim),
         // Shoulder blocks.
-        part(game, [-0.5, 0.7, 0.5], [0.4, 0.4, 0.6], PLATE),
-        part(game, [0.5, 0.7, 0.5], [0.4, 0.4, 0.6], PLATE),
+        part([-0.5, 0.7, 0.5], [0.4, 0.4, 0.6], PLATE),
+        part([0.5, 0.7, 0.5], [0.4, 0.4, 0.6], PLATE),
         // Head, jaw and eyes.
-        part(game, [0, 0.8, 1], [0.6, 0.55, 0.75], HIDE),
-        part(game, [0, 0.55, 1.28], [0.5, 0.2, 0.35], PLATE),
-        part(game, [0, 0.92, 1.32], [0.44, 0.1, 0.06], HIDE, glow),
+        part([0, 0.8, 1], [0.6, 0.55, 0.75], HIDE),
+        part([0, 0.55, 1.28], [0.5, 0.2, 0.35], PLATE),
+        part([0, 0.92, 1.32], [0.44, 0.1, 0.06], HIDE, glow),
         // The horn.
-        part(game, [0, 1.4, 1.2], [0.17, 1.2, 0.17], HIDE, glow, true, [-0.26, 0, 0, 0.97]),
+        part([0, 1.4, 1.2], [0.17, 1.2, 0.17], HIDE, glow, true, [-0.2589, 0, 0, 0.9659]),
         // Four heavy legs with hooves.
-        part(game, [-0.45, -0.78, 0.62], [0.24, 1.15, 0.24], HIDE, NONE, true),
-        part(game, [0.45, -0.78, 0.62], [0.24, 1.15, 0.24], HIDE, NONE, true),
-        part(game, [-0.45, -0.78, -0.62], [0.24, 1.15, 0.24], HIDE, NONE, true),
-        part(game, [0.45, -0.78, -0.62], [0.24, 1.15, 0.24], HIDE, NONE, true),
-        part(game, [-0.45, -1.36, 0.62], [0.3, 0.18, 0.34], PLATE, dim),
-        part(game, [0.45, -1.36, 0.62], [0.3, 0.18, 0.34], PLATE, dim),
+        part([-0.45, -0.78, 0.62], [0.24, 1.15, 0.24], HIDE, NONE, true),
+        part([0.45, -0.78, 0.62], [0.24, 1.15, 0.24], HIDE, NONE, true),
+        part([-0.45, -0.78, -0.62], [0.24, 1.15, 0.24], HIDE, NONE, true),
+        part([0.45, -0.78, -0.62], [0.24, 1.15, 0.24], HIDE, NONE, true),
+        part([-0.45, -1.36, 0.62], [0.3, 0.18, 0.34], PLATE, dim),
+        part([0.45, -1.36, 0.62], [0.3, 0.18, 0.34], PLATE, dim),
         // Tail.
-        part(game, [0, 0.5, -1], [0.12, 0.9, 0.12], HIDE, dim, true, [0.45, 0, 0, 0.89]),
+        part([0, 0.5, -1], [0.12, 0.9, 0.12], HIDE, dim, true, [0.4512, 0, 0, 0.8924]),
     ];
 }

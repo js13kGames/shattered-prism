@@ -222,7 +222,7 @@ function shoot(game: Game, entity: Entity, neon: [number, number, number], damag
     let length = Math.hypot(dx, dy, dz) || 1;
 
     let bolt = instantiate(game, [
-        ...blueprint_bolt(game, entity, damage, neon),
+        ...blueprint_bolt(entity, damage, neon),
         set_position(
             self_position[0] + (dx / length) * 1.8,
             self_position[1] + 0.6 + (dy / length) * 1.8,

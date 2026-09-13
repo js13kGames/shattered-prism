@@ -7,20 +7,20 @@ import {lifespan} from "../components/com_lifespan.js";
 import {render_particles, render_prism} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
-import {Game, Layer} from "../game.js";
+import {Layer} from "../game.js";
 import {Weapon} from "../weapons.js";
 
 /**
  * Anything the player fires. The weapon table decides what it looks like, how
  * hard it hits, and whether it falls.
  */
-export function blueprint_shot(game: Game, weapon: Weapon, owner: Entity) {
+export function blueprint_shot(weapon: Weapon, owner: Entity) {
     return [
         transform(undefined, undefined, [...weapon.Size]),
         render_prism(
-            weapon.Splash ? game.MeshCylinder : game.MeshCube,
             weapon.Color,
             [...weapon.Neon, weapon.Splash ? 2.4 : 0.8],
+            weapon.Splash > 0,
         ),
         collide(true, Layer.Projectile, Layer.Terrain | Layer.Enemy, [0.5, 0.5, 0.5]),
         // No bounce and no friction. Only the mortar feels gravity.
@@ -32,14 +32,13 @@ export function blueprint_shot(game: Game, weapon: Weapon, owner: Entity) {
 
 /** What the gunners shoot back. */
 export function blueprint_bolt(
-    game: Game,
     owner: Entity,
     damage: number,
     neon: [number, number, number],
 ) {
     return [
         transform(undefined, undefined, [0.3, 0.3, 0.3]),
-        render_prism(game.MeshCube, [0.1, 0.1, 0.1, 1], [...neon, 2.8]),
+        render_prism([0.1, 0.1, 0.1, 1], [...neon, 2.8]),
         collide(true, Layer.Projectile, Layer.Terrain | Layer.Player, [0.6, 0.6, 0.6]),
         rigid_body(RigidKind.Dynamic, 0, 0, 0),
         projectile(damage, 0, owner, false, neon),
@@ -52,7 +51,6 @@ export function blueprint_bolt(
  * then expires; the particles outlive it by their own lifespan.
  */
 export function blueprint_burst(
-    game: Game,
     neon: [number, number, number],
     count: number,
     speed: number,
@@ -70,10 +68,10 @@ const DROP_COLOR: Vec4 = [0.1, 0.1, 0.1, 1];
 export const DROP_HEAL = 8;
 
 /** A neon pixel shaken loose by a close-range kill. Run into it to heal. */
-export function blueprint_drop(game: Game, neon: [number, number, number]) {
+export function blueprint_drop(neon: [number, number, number]) {
     return [
         transform(undefined, undefined, [0.28, 0.28, 0.28]),
-        render_prism(game.MeshCube, DROP_COLOR, [...neon, 2.6]),
+        render_prism(DROP_COLOR, [...neon, 2.6]),
         collide(true, Layer.Pickup, Layer.Terrain, [0.6, 0.6, 0.6]),
         rigid_body(RigidKind.Dynamic, 0.4),
         pickup(DROP_HEAL),
