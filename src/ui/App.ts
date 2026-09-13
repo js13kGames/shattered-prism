@@ -40,9 +40,9 @@ const BUTTON = `
 `;
 
 function Screen(game: Game) {
-    let title = "Shattered Prism";
+    let title = "Shattered prism";
     let colour = "#0ff";
-    let line = "Something is loose in the megastructure";
+    let line = `Hunt ${game.Enemies} unicorns before they hunt you.`;
     let button = "Enter";
 
     if (game.State === GameState.Dead) {
@@ -61,10 +61,8 @@ function Screen(game: Game) {
         <div style="${PANEL}">
             <div style="font-size: 6.5vmin; color: ${colour}; letter-spacing: .5em">${title}</div>
             <div>${line}</div>
-            <div style="opacity: .55; letter-spacing: .18em; line-height: 1.9">
-                WASD move &middot; mouse look &middot; click fire &middot; 1 2 3 or wheel to swap<br />
-                space jump, again in the air to dash &middot; shift slide<br />
-                they only come for you once they see you &middot; find the green door
+            <div style="opacity: .55; letter-spacing: .18em">
+                You played Quake, you know the controls.
             </div>
             <button style="${BUTTON}" onclick="$()">${button}</button>
         </div>
