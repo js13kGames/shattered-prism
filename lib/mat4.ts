@@ -220,8 +220,8 @@ export function mat4_from_perspective(
     near: number,
     far: number,
 ) {
-    let f = 1.0 / Math.tan(fovy / 2),
-        nf;
+    let f = 1.0 / Math.tan(fovy / 2);
+    let nf = 1 / (near - far);
     out[0] = f / aspect;
     out[1] = 0;
     out[2] = 0;
@@ -237,14 +237,8 @@ export function mat4_from_perspective(
     out[13] = 0;
     out[15] = 0;
 
-    if (far != null && far !== Infinity) {
-        nf = 1 / (near - far);
-        out[10] = (far + near) * nf;
-        out[14] = 2 * far * near * nf;
-    } else {
-        out[10] = -1;
-        out[14] = -2 * near;
-    }
+    out[10] = (far + near) * nf;
+    out[14] = 2 * far * near * nf;
 
     return out;
 }
